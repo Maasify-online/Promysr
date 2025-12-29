@@ -61,14 +61,14 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
         case 'review_needed':
             subject = `Action Required: Review ${data.owner_name || 'User'}'s Promise`;
             html = `
-                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                 <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     ${header}
                     <p style="color: #334155; font-size: 16px;">Hi <strong>${data.leader_name || 'Leader'}</strong>,</p>
                     <p style="color: #334155; font-size: 16px;"><strong>${data.owner_name || 'User'}</strong> has marked a promise as complete and needs your verification:</p>
                     <blockquote style="border-left: 4px solid #f59e0b; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
                         "${data.promise_text || 'Review Item'}"
                     </blockquote>
-                    <div style="background-color: #fffbeb; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fcd34d;">
+                     <div style="background-color: #fffbeb; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fcd34d;">
                         <p style="margin: 4px 0; color: #92400e; font-size: 14px;"><strong>Marked Complete:</strong> ${formatToIST(data.completed_at) || 'Just now'}</p>
                     </div>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -91,7 +91,7 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
                         "${data.promise_text || 'Task'}"
                     </blockquote>
                     <div style="background-color: #f0fdf4; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #dcfce7;">
-                        <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Completion Time:</strong> ${formatToIST(data.completed_at) || 'Just now'}</p>
+                         <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Completion Time:</strong> ${formatToIST(data.completed_at) || 'Just now'}</p>
                     </div>
                     <a href="${appUrl}/dashboard" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Details</a>
                 </div>
@@ -197,23 +197,108 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
                     <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}</p>
                     
                     <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
-                        <h3 style="margin: 0 0 12px 0; color: #0369a1;">This Week's Performance</h3>
-                        <p style="margin: 4px 0; color: #075985;">✓ Completed: <strong>${data.completed_count || 0} promises</strong></p>
-                        <p style="margin: 4px 0; color: #075985;">⏳ In Progress: <strong>${data.in_progress_count || 0} promises</strong></p>
-                        <p style="margin: 4px 0; color: #075985;">⚠️ Missed: <strong>${data.missed_count || 0} promises</strong></p>
-                        ${data.integrity_score ? `<p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #0369a1;">📊 Integrity Score: ${data.integrity_score}%</p>` : ''}
+                        <h3 style="margin: 0 0 16px 0; color: #0c4a6e;">Your Promise Status</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #3b82f6;">${data.open_count || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Open</p>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #f59e0b;">${data.pending_count || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Pending</p>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #ef4444;">${data.overdue_count || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Overdue</p>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #dc2626;">${data.missed_count || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Missed</p>
+                            </div>
+                        </div>
+                        ${data.integrity_score ? `<div style="margin-top: 16px; padding: 12px; background: white; border-radius: 6px; text-align: center;">
+                            <p style="margin: 0; font-size: 28px; font-weight: bold; color: ${data.integrity_score >= 80 ? '#16a34a' : data.integrity_score >= 60 ? '#f59e0b' : '#ef4444'};">${data.integrity_score}%</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Integrity Score</p>
+                        </div>` : ''}
                     </div>
 
-                    <h3 style="color: #1e293b; margin-bottom: 12px;">Upcoming This Week</h3>
-                    ${upcomingList}
+                    <h3 style="color: #1e293b; margin-bottom: 12px;">📅 Upcoming This Week</h3>
+                    <div style="margin-bottom: 24px;">
+                        ${upcomingList}
+                    </div>
 
-                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 24px;">View Full Report</a>
+                    ${data.overdue_count > 0 ? `<div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="margin: 0; color: #991b1b; font-weight: 600;">⚠️ You have ${data.overdue_count} overdue ${data.overdue_count === 1 ? 'promise' : 'promises'}</p>
+                        <p style="margin: 8px 0 0 0; color: #991b1b; font-size: 14px;">Please complete or reschedule them soon to maintain your integrity score.</p>
+                    </div>` : ''}
+
+                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View User Portal</a>
+                </div>
+            `;
+            break;
+
+        case 'weekly_leader_report':
+            subject = `👑 Weekly Team Pulse: Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}`;
+            const redFlagsList = data.red_flags?.slice(0, 5).map((flag: any) =>
+                `<div style="padding: 12px; background: #fef2f2; border-left: 3px solid #ef4444; margin-bottom: 8px; border-radius: 4px;">
+                    <p style="margin: 0; font-weight: 600; color: #991b1b;">${flag.owner_name}</p>
+                    <p style="margin: 4px 0; font-size: 14px; color: #7f1d1d;">${flag.promise_text}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #991b1b;">
+                        ${flag.status === 'Missed' ? '❌ Missed' : '⏰ Overdue'} - Due: ${formatToIST(flag.due_date)}
+                    </p>
+                </div>`
+            ).join('') || '<p style="color: #64748b;">No red flags this week! 🎉</p>';
+
+            html = `
+                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    ${header}
+                    <h2 style="color: #1e293b; margin-bottom: 8px;">👑 Team Pulse Report</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}</p>
+                    
+                    <div style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                        <h3 style="margin: 0 0 16px 0; color: #78350f;">Team Overview</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #3b82f6;">${data.total_active || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Active Promises</p>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #f59e0b;">${data.pending_verification || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Need Review</p>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #ef4444;">${data.overdue_count || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Overdue</p>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #64748b;">${data.team_member_count || 0}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Team Members</p>
+                            </div>
+                        </div>
+                        ${data.team_avg_score ? `<div style="margin-top: 16px; padding: 12px; background: white; border-radius: 6px; text-align: center;">
+                            <p style="margin: 0; font-size: 28px; font-weight: bold; color: ${data.team_avg_score >= 80 ? '#16a34a' : data.team_avg_score >= 60 ? '#f59e0b' : '#ef4444'};">${data.team_avg_score}%</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Team Avg Integrity</p>
+                        </div>` : ''}
+                    </div>
+
+                    <h3 style="color: #1e293b; margin-bottom: 12px;">🚨 Red Flags (Overdue/Missed)</h3>
+                    <div style="margin-bottom: 24px;">
+                        ${redFlagsList}
+                        ${data.red_flags && data.red_flags.length > 5 ? `<p style="color: #64748b; font-size: 14px; margin-top: 12px;">+ ${data.red_flags.length - 5} more in dashboard</p>` : ''}
+                    </div>
+
+                    ${data.pending_verification > 0 ? `<div style="background: #fffbeb; border: 1px solid #fcd34d; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="margin: 0; color: #92400e; font-weight: 600;">⏳ ${data.pending_verification} ${data.pending_verification === 1 ? 'promise needs' : 'promises need'} your verification</p>
+                        <p style="margin: 8px 0 0 0; color: #92400e; font-size: 14px;">Review and verify completed work to keep your team moving.</p>
+                    </div>` : ''}
+
+                    <a href="${appUrl}/dashboard" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">Review Team Dashboard</a>
                 </div>
             `;
             break;
 
         default:
-            subject = "Notification from PromySr";
+            subject = "Notification from Promysr";
             html = `<div>You have a new notification.</div>`;
     }
 
