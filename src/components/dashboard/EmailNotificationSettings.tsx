@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Bell, Clock, Calendar, Save } from 'lucide-react';
+import { Bell, Clock, Calendar, Save, Eye } from 'lucide-react';
 
 interface EmailSettings {
     promise_created_enabled: boolean;
@@ -50,6 +51,123 @@ export const EmailNotificationSettings = () => {
     const [settings, setSettings] = useState<EmailSettings | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [previewType, setPreviewType] = useState<string | null>(null);
+
+    const getEmailPreview = (type: string) => {
+        const sampleData: Record<string, any> = {
+            'promise-created': {
+                title: 'New Promise Assigned',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #007AFF;">New Promise Assigned</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <p>You have been assigned a new promise:</p>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
+                        <p style="margin: 8px 0 0 0; color: #64748b;">Due: Dec 30, 2025</p>
+                    </div>
+                    <a href="#" style="display: inline-block; background: #007AFF; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">View Promise</a>
+                </div>`
+            },
+            'review-needed': {
+                title: 'Review Needed',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #f59e0b;">Action Required: Review Needed</h2>
+                    <p>Hi <strong>Manager</strong>,</p>
+                    <p><strong>John Doe</strong> has marked a promise as complete and needs your review:</p>
+                    <div style="background: #fef3c7; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
+                        <p style="margin: 8px 0 0 0; color: #92400e;">Completed: Dec 29, 2025 at 2:00 PM</p>
+                    </div>
+                    <a href="#" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">Review Now</a>
+                </div>`
+            },
+            'promise-verified': {
+                title: 'Promise Verified',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #10b981;">✓ Promise Verified</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <p>Great news! Your promise has been verified:</p>
+                    <div style="background: #d1fae5; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
+                        <p style="margin: 8px 0 0 0; color: #065f46;">Your Integrity Score: 95%</p>
+                    </div>
+                    <p style="color: #059669;">Keep up the excellent work!</p>
+                </div>`
+            },
+            'completion-rejected': {
+                title: 'Completion Not Verified',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">Completion Not Verified</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <p>Your completion needs revision:</p>
+                    <div style="background: #fee2e2; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
+                        <p style="margin: 8px 0 0 0; color: #991b1b;"><strong>Feedback:</strong> Please include the financial summary section</p>
+                    </div>
+                    <a href="#" style="display: inline-block; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">Update Promise</a>
+                </div>`
+            },
+            'promise-closed': {
+                title: 'Promise Kept',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #10b981;">🎉 Promise Kept!</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <p>Congratulations! Your promise has been successfully completed:</p>
+                    <div style="background: #d1fae5; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
+                        <p style="margin: 8px 0 0 0; color: #065f46;">Completed: Dec 29, 2025</p>
+                    </div>
+                </div>`
+            },
+            'promise-missed': {
+                title: 'Promise Missed',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ MISSED: Promise Deadline Passed</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <p>A promise deadline has been missed:</p>
+                    <div style="background: #fee2e2; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
+                        <p style="margin: 8px 0 0 0; color: #991b1b;">Was due: Dec 28, 2025</p>
+                    </div>
+                    <a href="#" style="display: inline-block; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">Take Action</a>
+                </div>`
+            },
+            'daily-brief': {
+                title: 'Your Daily Brief',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #007AFF;">Your Daily Brief - Dec 29, 2025</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <p>Here's your daily summary:</p>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <h3 style="margin: 0 0 12px 0; color: #334155;">Due Today (3)</h3>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li>Complete Q4 Financial Report</li>
+                            <li>Review team performance metrics</li>
+                            <li>Submit budget proposal</li>
+                        </ul>
+                    </div>
+                    <a href="#" style="display: inline-block; background: #007AFF; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">View Dashboard</a>
+                </div>`
+            },
+            'weekly-reminder': {
+                title: 'Weekly Reminder',
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #8b5cf6;">Weekly Summary - Week of Dec 23</h2>
+                    <p>Hi <strong>John Doe</strong>,</p>
+                    <div style="background: #f5f3ff; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <h3 style="margin: 0 0 12px 0; color: #5b21b6;">Your Stats</h3>
+                        <p style="margin: 4px 0;">✓ Completed: 5 promises</p>
+                        <p style="margin: 4px 0;">⏳ In Progress: 3 promises</p>
+                        <p style="margin: 4px 0;">⚠️ Missed: 1 promise</p>
+                        <p style="margin: 12px 0 0 0; font-weight: 600;">Integrity Score: 92%</p>
+                    </div>
+                    <a href="#" style="display: inline-block; background: #8b5cf6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">View Full Report</a>
+                </div>`
+            }
+        };
+
+        return sampleData[type] || { title: 'Preview', preview: '<p>No preview available</p>' };
+    };
 
     useEffect(() => {
         loadSettings();
@@ -174,76 +292,136 @@ export const EmailNotificationSettings = () => {
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-created" className="flex-1">
                                         <div className="font-medium">Promise Created</div>
                                         <div className="text-sm text-muted-foreground">When a new promise is assigned to you</div>
                                     </Label>
-                                    <Switch
-                                        id="promise-created"
-                                        checked={settings.promise_created_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, promise_created_enabled: checked })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('promise-created')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="promise-created"
+                                            checked={settings.promise_created_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_created_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="review-needed" className="flex-1">
                                         <div className="font-medium">Review Needed</div>
                                         <div className="text-sm text-muted-foreground">When a team member marks a promise as complete</div>
                                     </Label>
-                                    <Switch
-                                        id="review-needed"
-                                        checked={settings.review_needed_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, review_needed_enabled: checked })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('review-needed')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="review-needed"
+                                            checked={settings.review_needed_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, review_needed_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-closed" className="flex-1">
                                         <div className="font-medium">Promise Closed</div>
                                         <div className="text-sm text-muted-foreground">When a promise is verified and closed</div>
                                     </Label>
-                                    <Switch
-                                        id="promise-closed"
-                                        checked={settings.promise_closed_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, promise_closed_enabled: checked })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('promise-closed')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="promise-closed"
+                                            checked={settings.promise_closed_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_closed_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-verified" className="flex-1">
                                         <div className="font-medium">Promise Verified</div>
                                         <div className="text-sm text-muted-foreground">When your completed promise is verified</div>
                                     </Label>
-                                    <Switch
-                                        id="promise-verified"
-                                        checked={settings.promise_verified_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, promise_verified_enabled: checked })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('promise-verified')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="promise-verified"
+                                            checked={settings.promise_verified_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_verified_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="completion-rejected" className="flex-1">
                                         <div className="font-medium">Completion Rejected</div>
                                         <div className="text-sm text-muted-foreground">When your completion is rejected with feedback</div>
                                     </Label>
-                                    <Switch
-                                        id="completion-rejected"
-                                        checked={settings.completion_rejected_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, completion_rejected_enabled: checked })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('completion-rejected')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="completion-rejected"
+                                            checked={settings.completion_rejected_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, completion_rejected_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-missed" className="flex-1">
                                         <div className="font-medium">Promise Missed</div>
                                         <div className="text-sm text-muted-foreground">When a promise deadline is missed</div>
                                     </Label>
-                                    <Switch
-                                        id="promise-missed"
-                                        checked={settings.promise_missed_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, promise_missed_enabled: checked })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('promise-missed')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="promise-missed"
+                                            checked={settings.promise_missed_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_missed_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </AccordionContent>
@@ -259,13 +437,23 @@ export const EmailNotificationSettings = () => {
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="daily-brief" className="font-medium">Enable Daily Brief</Label>
-                                    <Switch
-                                        id="daily-brief"
-                                        checked={settings.daily_brief_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, daily_brief_enabled: checked })}
-                                    />
+                                <div className="flex items-center justify-between gap-2">
+                                    <Label htmlFor="daily-brief" className="flex-1 font-medium">Enable Daily Brief</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('daily-brief')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="daily-brief"
+                                            checked={settings.daily_brief_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, daily_brief_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
                                 {settings.daily_brief_enabled && (
@@ -327,13 +515,23 @@ export const EmailNotificationSettings = () => {
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="weekly-reminder" className="font-medium">Enable Weekly Reminder</Label>
-                                    <Switch
-                                        id="weekly-reminder"
-                                        checked={settings.weekly_reminder_enabled}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, weekly_reminder_enabled: checked })}
-                                    />
+                                <div className="flex items-center justify-between gap-2">
+                                    <Label htmlFor="weekly-reminder" className="flex-1 font-medium">Enable Weekly Reminder</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('weekly-reminder')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="weekly-reminder"
+                                            checked={settings.weekly_reminder_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, weekly_reminder_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
                                 {settings.weekly_reminder_enabled && (
@@ -413,6 +611,22 @@ export const EmailNotificationSettings = () => {
                     </Button>
                 </div>
             </CardContent>
+
+            {/* Email Preview Modal */}
+            <Dialog open={!!previewType} onOpenChange={() => setPreviewType(null)}>
+                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>{previewType && getEmailPreview(previewType).title}</DialogTitle>
+                        <DialogDescription>
+                            This is a preview of what the email will look like
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div
+                        className="mt-4"
+                        dangerouslySetInnerHTML={{ __html: previewType ? getEmailPreview(previewType).preview : '' }}
+                    />
+                </DialogContent>
+            </Dialog>
         </Card>
     );
 };
