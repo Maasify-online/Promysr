@@ -45,19 +45,16 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
         case 'new_assignment':
             subject = `New Promise Assigned: "${data.promise_text?.substring(0, 30)}..."`;
             html = `
-                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; margin: 0 auto; background-color: white;">
                     ${header}
-                    <p style="color: #334155; font-size: 16px;">Hi <strong>${data.owner_name || 'User'}</strong>,</p>
-                    <p style="color: #334155; font-size: 16px;">You have made (or been assigned) a new promise:</p>
-                    <blockquote style="border-left: 4px solid #007AFF; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
-                        "${data.promise_text || 'Review Item'}"
-                    </blockquote>
-                    <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-                        <p style="margin: 4px 0; color: #64748b; font-size: 14px;"><strong>Due Date:</strong> ${data.due_date || 'TBD'}</p>
-                        <p style="margin: 4px 0; color: #64748b; font-size: 14px;"><strong>Requester:</strong> ${data.leader_name || 'Team Leader'}</p>
-                        ${data.created_at ? `<p style="margin: 4px 0; color: #64748b; font-size: 14px;"><strong>Created:</strong> ${formatToIST(data.created_at)}</p>` : ''}
+                    <h2 style="color: #007AFF; margin-top: 0;">New Promise Assigned</h2>
+                    <p>Hi <strong>${data.owner_name || 'User'}</strong>,</p>
+                    <p>You have been assigned a new promise:</p>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin: 16px 0;">
+                        <p style="margin: 0; font-weight: 600;">${data.promise_text || 'Review Item'}</p>
+                        <p style="margin: 8px 0 0 0; color: #64748b;">Due: ${data.due_date || 'TBD'}</p>
                     </div>
-                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View My Promises</a>
+                    <a href="${appUrl}/user-portal" style="display: inline-block; background: #007AFF; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">View Promise</a>
                 </div>
             `;
             break;
