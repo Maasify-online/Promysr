@@ -10,7 +10,7 @@ export const getAppUrl = (): string => {
 export const getBrandingHeader = () => `
     <div style="margin-bottom: 24px; text-align: center;">
         <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
-            Promy<span style="color: #007AFF;">Sr</span>
+            Promy<span style="background: linear-gradient(135deg, #00C9B7 0%, #007AFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Sr</span>
         </h1>
         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
     </div>
