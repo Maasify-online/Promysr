@@ -21,10 +21,13 @@ const getEmailTemplate = (type: string, data: any = {}) => {
     let subject = "";
     let html = "";
 
+    // Helper to format dates in IST (India Standard Time)
     const formatToIST = (dateStr: string) => {
         if (!dateStr) return '';
         try {
+            // Check if it's already a formatted string (legacy support)
             if (!dateStr.includes('T') && !dateStr.includes('-')) return dateStr;
+
             return new Date(dateStr).toLocaleString('en-IN', {
                 timeZone: 'Asia/Kolkata',
                 dateStyle: 'medium',
@@ -53,17 +56,18 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                 </div>
             `;
             break;
+
         case 'review_needed':
             subject = `Action Required: Review ${data.owner_name || 'User'}'s Promise`;
             html = `
-                 <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     ${header}
                     <p style="color: #334155; font-size: 16px;">Hi <strong>${data.leader_name || 'Leader'}</strong>,</p>
                     <p style="color: #334155; font-size: 16px;"><strong>${data.owner_name || 'User'}</strong> has marked a promise as complete and needs your verification:</p>
                     <blockquote style="border-left: 4px solid #f59e0b; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
                         "${data.promise_text || 'Review Item'}"
                     </blockquote>
-                     <div style="background-color: #fffbeb; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fcd34d;">
+                    <div style="background-color: #fffbeb; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fcd34d;">
                         <p style="margin: 4px 0; color: #92400e; font-size: 14px;"><strong>Marked Complete:</strong> ${formatToIST(data.completed_at) || 'Just now'}</p>
                     </div>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -73,6 +77,7 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                 </div>
             `;
             break;
+
         case 'closed':
         case 'promise_completed':
             subject = `Promise Kept: ${data.owner_name || 'User'} completed a task`;
@@ -85,12 +90,13 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                         "${data.promise_text || 'Task'}"
                     </blockquote>
                     <div style="background-color: #f0fdf4; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #dcfce7;">
-                         <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Completion Time:</strong> ${formatToIST(data.completed_at) || 'Just now'}</p>
+                        <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Completion Time:</strong> ${formatToIST(data.completed_at) || 'Just now'}</p>
                     </div>
                     <a href="${appUrl}/dashboard" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Details</a>
                 </div>
             `;
             break;
+
         case 'missed':
             subject = `MISSED: ${data.promise_text?.substring(0, 30)}...`;
             html = `
@@ -109,6 +115,7 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                 </div>
             `;
             break;
+
         case 'due-today':
         case 'digest_user':
             subject = `Your Daily Brief: ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
@@ -131,6 +138,7 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                 </div>
             `;
             break;
+
         case 'completion_rejected':
             subject = `Completion Not Verified: "${data.promise_text?.substring(0, 30)}..."`;
             html = `
@@ -151,6 +159,7 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                 </div>
             `;
             break;
+
         case 'promise_verified':
             subject = `✓ Promise Verified: "${data.promise_text?.substring(0, 30)}..."`;
             html = `
@@ -170,8 +179,40 @@ const getEmailTemplate = (type: string, data: any = {}) => {
                 </div>
             `;
             break;
+
+        case 'weekly_user_report':
+            subject = `📊 Weekly Accountability Report: Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}`;
+            const upcomingList = data.upcoming_tasks?.map((task: any) =>
+                `<div style="padding: 12px; background: #f8fafc; border-left: 3px solid #3b82f6; margin-bottom: 8px; border-radius: 4px;">
+                    <p style="margin: 0; font-weight: 600; color: #1e293b;">${task.text}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Due: ${formatToIST(task.due_date)}</p>
+                </div>`
+            ).join('') || '<p style="color: #64748b;">No upcoming tasks this week</p>';
+
+            html = `
+                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    ${header}
+                    <h2 style="color: #1e293b; margin-bottom: 8px;">📊 Your Weekly Report</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}</p>
+                    
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                        <h3 style="margin: 0 0 12px 0; color: #0369a1;">This Week's Performance</h3>
+                        <p style="margin: 4px 0; color: #075985;">✓ Completed: <strong>${data.completed_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⏳ In Progress: <strong>${data.in_progress_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⚠️ Missed: <strong>${data.missed_count || 0} promises</strong></p>
+                        ${data.integrity_score ? `<p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #0369a1;">📊 Integrity Score: ${data.integrity_score}%</p>` : ''}
+                    </div>
+
+                    <h3 style="color: #1e293b; margin-bottom: 12px;">Upcoming This Week</h3>
+                    ${upcomingList}
+
+                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 24px;">View Full Report</a>
+                </div>
+            `;
+            break;
+
         default:
-            subject = "Notification from Promysr";
+            subject = "Notification from PromySr";
             html = `<div>You have a new notification.</div>`;
     }
 
