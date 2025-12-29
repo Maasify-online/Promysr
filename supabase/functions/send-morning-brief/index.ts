@@ -55,11 +55,41 @@ serve(async (req) => {
             }
         });
 
+        // 3.5 FETCH PREFERENCES
+        const { data: preferences } = await supabase.from('email_notification_settings').select('*');
+        const prefMap = new Map(preferences?.map(p => [p.user_id, p]));
+
+        // Helper to check preference (Default TRUE)
+        const checkPref = (email: string, key: string, userId?: string) => {
+            // Find user ID from email if not provided (inefficient but safe for now)
+            // Better: We should have mapped email->ID earlier.
+            // Let's use the profileMap from Step 3.
+            // We need to inverse map or iterate.
+
+            // Optimization: Since we have profileMap (ID -> Profile), let's find ID by Email
+            let uid = userId;
+            if (!uid) {
+                for (const [id, prof] of profileMap.entries()) {
+                    if (prof.email === email) { uid = id; break; }
+                }
+            }
+
+            if (!uid) return true; // Default to true if user not found (safe fallback)
+
+            const settings = prefMap.get(uid);
+            if (!settings) return true; // Default to true if no settings row
+            return settings[key] === true;
+        }
+
         // 4. SEND EMAILS (Batched)
-        const emailPromises = [];
 
         // A. Send Doer Briefs
         for (const [email, tasks] of doerMap.entries()) {
+            if (!checkPref(email, 'daily_digest')) {
+                console.log(`Skipping Daily Digest for ${email} (Preference Off)`);
+                continue;
+            }
+
             const taskList = tasks.map((t: any) => `- ${t.promise_text} (${t.status})`).join('\n');
             const res = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
@@ -76,6 +106,11 @@ serve(async (req) => {
 
         // B. Send Leader Radars
         for (const [email, tasks] of leaderMap.entries()) {
+            if (!checkPref(email, 'team_activity')) { // Assuming Leader Radar counts as Team Activity
+                console.log(`Skipping Leader Radar for ${email} (Preference Off)`);
+                continue;
+            }
+
             const teamList = tasks.map((t: any) => `- ${t.owner_name}: ${t.promise_text} (${t.status})`).join('\n');
             const res = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
