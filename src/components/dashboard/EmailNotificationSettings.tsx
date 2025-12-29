@@ -78,10 +78,9 @@ export const EmailNotificationSettings = () => {
                 title: 'Action Required: Review Needed',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
@@ -102,10 +101,9 @@ export const EmailNotificationSettings = () => {
                 title: '✓ Promise Verified',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <p style="color: #334155; font-size: 16px;">Hi <strong>John Doe</strong>,</p>
@@ -125,10 +123,9 @@ export const EmailNotificationSettings = () => {
                 title: 'Completion Not Verified',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <p style="color: #334155; font-size: 16px;">Hi <strong>John Doe</strong>,</p>
@@ -149,10 +146,9 @@ export const EmailNotificationSettings = () => {
                 title: 'Promise Kept',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
@@ -170,10 +166,9 @@ export const EmailNotificationSettings = () => {
                 title: 'MISSED: Promise Deadline Passed',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
@@ -192,10 +187,9 @@ export const EmailNotificationSettings = () => {
                 title: 'Your Daily Brief',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <p style="color: #334155; font-size: 16px;">Good Morning <strong>John Doe</strong>,</p>
@@ -217,10 +211,9 @@ export const EmailNotificationSettings = () => {
                 title: 'Weekly Accountability Report',
                 preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <h2 style="color: #1e293b; margin-bottom: 8px;">📊 Your Weekly Report</h2>
