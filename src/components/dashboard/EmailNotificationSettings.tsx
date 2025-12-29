@@ -57,8 +57,15 @@ export const EmailNotificationSettings = () => {
         const sampleData: Record<string, any> = {
             'promise-created': {
                 title: 'New Promise Assigned',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #007AFF;">New Promise Assigned</h2>
+                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
+                    </div>
+                    <h2 style="color: #007AFF; margin-top: 0;">New Promise Assigned</h2>
                     <p>Hi <strong>John Doe</strong>,</p>
                     <p>You have been assigned a new promise:</p>
                     <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin: 16px 0;">
@@ -69,99 +76,164 @@ export const EmailNotificationSettings = () => {
                 </div>`
             },
             'review-needed': {
-                title: 'Review Needed',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #f59e0b;">Action Required: Review Needed</h2>
-                    <p>Hi <strong>Manager</strong>,</p>
-                    <p><strong>John Doe</strong> has marked a promise as complete and needs your review:</p>
-                    <div style="background: #fef3c7; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
-                        <p style="margin: 8px 0 0 0; color: #92400e;">Completed: Dec 29, 2025 at 2:00 PM</p>
+                title: 'Action Required: Review Needed',
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
-                    <a href="#" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">Review Now</a>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;"><strong>John Doe</strong> has marked a promise as complete and needs your verification:</p>
+                    <blockquote style="border-left: 4px solid #f59e0b; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
+                        "Complete Q4 Financial Report"
+                    </blockquote>
+                    <div style="background-color: #fffbeb; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fcd34d;">
+                        <p style="margin: 4px 0; color: #92400e; font-size: 14px;"><strong>Marked Complete:</strong> Dec 29, 2025 at 2:00 PM</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <a href="#" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; flex: 1; text-align: center; min-width: 140px;">✓ Verify Completion</a>
+                        <a href="#" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; flex: 1; text-align: center; min-width: 140px;">✗ Reject</a>
+                    </div>
                 </div>`
             },
             'promise-verified': {
-                title: 'Promise Verified',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #10b981;">✓ Promise Verified</h2>
-                    <p>Hi <strong>John Doe</strong>,</p>
-                    <p>Great news! Your promise has been verified:</p>
-                    <div style="background: #d1fae5; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
-                        <p style="margin: 8px 0 0 0; color: #065f46;">Your Integrity Score: 95%</p>
+                title: '✓ Promise Verified',
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
-                    <p style="color: #059669;">Keep up the excellent work!</p>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>John Doe</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">🎉 Congratulations! Your promise has been <span style="color: #16a34a; font-weight: bold;">verified and completed</span>:</p>
+                    <blockquote style="border-left: 4px solid #16a34a; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
+                        "Complete Q4 Financial Report"
+                    </blockquote>
+                    <div style="background-color: #f0fdf4; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #dcfce7;">
+                        <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Verified By:</strong> Manager</p>
+                        <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Completion Time:</strong> Dec 29, 2025</p>
+                        <p style="margin: 12px 0 4px 0; color: #166534; font-size: 16px; font-weight: 600;">📊 Your Integrity Score: 95%</p>
+                    </div>
+                    <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View My Stats</a>
                 </div>`
             },
             'completion-rejected': {
                 title: 'Completion Not Verified',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #ef4444;">Completion Not Verified</h2>
-                    <p>Hi <strong>John Doe</strong>,</p>
-                    <p>Your completion needs revision:</p>
-                    <div style="background: #fee2e2; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
-                        <p style="margin: 8px 0 0 0; color: #991b1b;"><strong>Feedback:</strong> Please include the financial summary section</p>
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
-                    <a href="#" style="display: inline-block; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">Update Promise</a>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>John Doe</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">Your promise completion was <span style="color: #ef4444; font-weight: bold;">not verified</span> by Manager:</p>
+                    <blockquote style="border-left: 4px solid #ef4444; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
+                        "Complete Q4 Financial Report"
+                    </blockquote>
+                    <div style="background-color: #fef2f2; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;">
+                        <p style="margin: 4px 0; color: #991b1b; font-size: 14px;"><strong>Feedback:</strong></p>
+                        <p style="margin: 8px 0; color: #991b1b; font-size: 14px;">Please include the financial summary section</p>
+                        <p style="margin: 12px 0 4px 0; color: #991b1b; font-size: 14px;"><strong>Rejected At:</strong> Dec 29, 2025</p>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Please review the feedback and resubmit when ready.</p>
+                    <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">Resubmit Completion</a>
                 </div>`
             },
             'promise-closed': {
                 title: 'Promise Kept',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #10b981;">🎉 Promise Kept!</h2>
-                    <p>Hi <strong>John Doe</strong>,</p>
-                    <p>Congratulations! Your promise has been successfully completed:</p>
-                    <div style="background: #d1fae5; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
-                        <p style="margin: 8px 0 0 0; color: #065f46;">Completed: Dec 29, 2025</p>
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">Good news! <strong>John Doe</strong> has marked a promise as <span style="color: #16a34a; font-weight: bold;">Kept</span>:</p>
+                    <blockquote style="border-left: 4px solid #16a34a; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
+                        "Complete Q4 Financial Report"
+                    </blockquote>
+                    <div style="background-color: #f0fdf4; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #dcfce7;">
+                        <p style="margin: 4px 0; color: #166534; font-size: 14px;"><strong>Completion Time:</strong> Dec 29, 2025</p>
+                    </div>
+                    <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Details</a>
                 </div>`
             },
             'promise-missed': {
-                title: 'Promise Missed',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #ef4444;">⚠️ MISSED: Promise Deadline Passed</h2>
-                    <p>Hi <strong>John Doe</strong>,</p>
-                    <p>A promise deadline has been missed:</p>
-                    <div style="background: #fee2e2; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <p style="margin: 0; font-weight: 600;">Complete Q4 Financial Report</p>
-                        <p style="margin: 8px 0 0 0; color: #991b1b;">Was due: Dec 28, 2025</p>
+                title: 'MISSED: Promise Deadline Passed',
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
-                    <a href="#" style="display: inline-block; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">Take Action</a>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">A promise has been <span style="color: #ef4444; font-weight: bold;">missed</span>:</p>
+                    <blockquote style="border-left: 4px solid #ef4444; padding-left: 16px; margin: 24px 0; color: #1e293b; font-size: 18px; font-weight: 500;">
+                        "Complete Q4 Financial Report"
+                    </blockquote>
+                    <div style="background-color: #fef2f2; padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;">
+                        <p style="margin: 4px 0; color: #991b1b; font-size: 14px;"><strong>Original Due Date:</strong> Dec 28, 2025</p>
+                        <p style="margin: 4px 0; color: #991b1b; font-size: 14px;"><strong>Owner:</strong> John Doe</p>
+                    </div>
+                    <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Dashboard</a>
                 </div>`
             },
             'daily-brief': {
                 title: 'Your Daily Brief',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #007AFF;">Your Daily Brief - Dec 29, 2025</h2>
-                    <p>Hi <strong>John Doe</strong>,</p>
-                    <p>Here's your daily summary:</p>
-                    <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <h3 style="margin: 0 0 12px 0; color: #334155;">Due Today (3)</h3>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li>Complete Q4 Financial Report</li>
-                            <li>Review team performance metrics</li>
-                            <li>Submit budget proposal</li>
-                        </ul>
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
-                    <a href="#" style="display: inline-block; background: #007AFF; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">View Dashboard</a>
+                    <p style="color: #334155; font-size: 16px;">Good Morning <strong>John Doe</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">Here are your commitments due today:</p>
+                    <div style="margin: 24px 0;">
+                        <div style="padding: 16px; border-left: 4px solid #007AFF; background: #f8fafc; margin-bottom: 12px;">
+                            <p style="margin: 0; font-weight: 600; color: #1e293b;">"Complete Q4 Financial Report"</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Due by 5:00 PM</p>
+                        </div>
+                        <div style="padding: 16px; border-left: 4px solid #007AFF; background: #f8fafc; margin-bottom: 12px;">
+                            <p style="margin: 0; font-weight: 600; color: #1e293b;">"Review team performance metrics"</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Due by EOD</p>
+                        </div>
+                    </div>
+                    <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">Mark as Complete</a>
                 </div>`
             },
             'weekly-reminder': {
-                title: 'Weekly Reminder',
-                preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #8b5cf6;">Weekly Summary - Week of Dec 23</h2>
-                    <p>Hi <strong>John Doe</strong>,</p>
-                    <div style="background: #f5f3ff; padding: 16px; border-radius: 6px; margin: 16px 0;">
-                        <h3 style="margin: 0 0 12px 0; color: #5b21b6;">Your Stats</h3>
-                        <p style="margin: 4px 0;">✓ Completed: 5 promises</p>
-                        <p style="margin: 4px 0;">⏳ In Progress: 3 promises</p>
-                        <p style="margin: 4px 0;">⚠️ Missed: 1 promise</p>
-                        <p style="margin: 12px 0 0 0; font-weight: 600;">Integrity Score: 92%</p>
+                title: 'Weekly Accountability Report',
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
+                        </div>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
-                    <a href="#" style="display: inline-block; background: #8b5cf6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">View Full Report</a>
+                    <h2 style="color: #1e293b; margin-bottom: 8px;">📊 Your Weekly Report</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of Dec 23, 2025</p>
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                        <h3 style="margin: 0 0 12px 0; color: #0369a1;">This Week's Performance</h3>
+                        <p style="margin: 4px 0; color: #075985;">✓ Completed: <strong>5 promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⏳ In Progress: <strong>3 promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⚠️ Missed: <strong>1 promise</strong></p>
+                        <p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #0369a1;">📊 Integrity Score: 92%</p>
+                    </div>
+                    <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Full Report</a>
                 </div>`
             }
         };
