@@ -14,19 +14,31 @@ const APP_URL = Deno.env.get('APP_URL') || 'https://promysr.vercel.app'
 serve(async (req) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-    // This function is meant to be called by a CRON JOB (e.g., 8 AM)
-    // curl -X POST .../functions/v1/send-morning-brief -H "Authorization: Bearer SERVICE_KEY"
+    // This function can be called by:
+    // 1. CRON JOB (sends to all users)
+    // 2. Scheduler with specific userEmail (sends to one user)
 
     try {
         const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
         const today = new Date().toISOString().split('T')[0]
 
+        // Check if we're sending to a specific user
+        const body = req.method === 'POST' ? await req.json() : {}
+        const targetUserEmail = body.userEmail || null
+
         // 1. FETCH ALL ACTIVE PROMISES
-        const { data: promises, error } = await supabase
+        let query = supabase
             .from('promises')
             .select('*')
             .in('status', ['Open', 'Missed']) // Brief on active or recently missed
             .lte('due_date', today) // Due today or earlier (overdue)
+
+        // If targeting specific user, filter by their email
+        if (targetUserEmail) {
+            query = query.eq('owner_email', targetUserEmail)
+        }
+
+        const { data: promises, error } = await query
 
         if (error || !promises) throw error
 

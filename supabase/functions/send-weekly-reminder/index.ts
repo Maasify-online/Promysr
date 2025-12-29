@@ -11,6 +11,10 @@ serve(async (req) => {
     try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+        // Check if we're sending to a specific user
+        const body = req.method === 'POST' ? await req.json() : {}
+        const targetUserEmail = body.userEmail || null
+
         // Get current date for the week
         const now = new Date();
         const weekStart = new Date(now);
@@ -19,11 +23,18 @@ serve(async (req) => {
         weekEnd.setDate(weekStart.getDate() + 7); // End of week
 
         // Fetch all active promises
-        const { data: allPromises, error: promisesError } = await supabase
+        let query = supabase
             .from('promises')
             .select('*')
             .neq('status', 'Closed')
             .order('due_date', { ascending: true });
+
+        // If targeting specific user, filter by their email
+        if (targetUserEmail) {
+            query = query.eq('owner_email', targetUserEmail)
+        }
+
+        const { data: allPromises, error: promisesError } = await query
 
         if (promisesError) throw promisesError;
 
