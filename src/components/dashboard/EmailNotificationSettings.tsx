@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Bell, Clock, Calendar, Save, Eye } from 'lucide-react';
 
@@ -358,7 +359,10 @@ export const EmailNotificationSettings = () => {
                             <div className="space-y-4 pt-2">
                                 <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-created" className="flex-1">
-                                        <div className="font-medium">Promise Created</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Promise Created</span>
+                                            <Badge variant="secondary" className="text-xs">You</Badge>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">When a new promise is assigned to you</div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -380,7 +384,10 @@ export const EmailNotificationSettings = () => {
 
                                 <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="review-needed" className="flex-1">
-                                        <div className="font-medium">Review Needed</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Review Needed</span>
+                                            <Badge variant="default" className="text-xs bg-blue-600">Leader</Badge>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">When a team member marks a promise as complete</div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -402,7 +409,10 @@ export const EmailNotificationSettings = () => {
 
                                 <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-closed" className="flex-1">
-                                        <div className="font-medium">Promise Closed</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Promise Closed</span>
+                                            <Badge variant="default" className="text-xs bg-blue-600">Leader</Badge>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">When a promise is verified and closed</div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -424,7 +434,10 @@ export const EmailNotificationSettings = () => {
 
                                 <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-verified" className="flex-1">
-                                        <div className="font-medium">Promise Verified</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Promise Verified</span>
+                                            <Badge variant="secondary" className="text-xs">You</Badge>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">When your completed promise is verified</div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -446,7 +459,10 @@ export const EmailNotificationSettings = () => {
 
                                 <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="completion-rejected" className="flex-1">
-                                        <div className="font-medium">Completion Rejected</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Completion Rejected</span>
+                                            <Badge variant="secondary" className="text-xs">You</Badge>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">When your completion is rejected with feedback</div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -468,7 +484,10 @@ export const EmailNotificationSettings = () => {
 
                                 <div className="flex items-center justify-between gap-2">
                                     <Label htmlFor="promise-missed" className="flex-1">
-                                        <div className="font-medium">Promise Missed</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Promise Missed</span>
+                                            <Badge variant="default" className="text-xs bg-blue-600">Leader</Badge>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">When a promise deadline is missed</div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -502,7 +521,12 @@ export const EmailNotificationSettings = () => {
                         <AccordionContent>
                             <div className="space-y-4 pt-2">
                                 <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="daily-brief" className="flex-1 font-medium">Enable Daily Brief</Label>
+                                    <Label htmlFor="daily-brief" className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Enable Daily Brief</span>
+                                            <Badge variant="outline" className="text-xs">Everyone</Badge>
+                                        </div>
+                                    </Label>
                                     <div className="flex items-center gap-2">
                                         <Button
                                             variant="ghost"
@@ -580,7 +604,12 @@ export const EmailNotificationSettings = () => {
                         <AccordionContent>
                             <div className="space-y-4 pt-2">
                                 <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="weekly-reminder" className="flex-1 font-medium">Enable Weekly Reminder</Label>
+                                    <Label htmlFor="weekly-reminder" className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Enable Weekly Reminder</span>
+                                            <Badge variant="outline" className="text-xs">Everyone</Badge>
+                                        </div>
+                                    </Label>
                                     <div className="flex items-center gap-2">
                                         <Button
                                             variant="ghost"

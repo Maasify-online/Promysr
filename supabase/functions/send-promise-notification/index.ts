@@ -280,7 +280,7 @@ serve(async (req) => {
                 requiredPref = 'promise_closed_enabled'
                 break
             case 'promise_verified':
-                to = leader_email || owner_email
+                to = owner_email  // Person who did the work gets the confirmation
                 requiredPref = 'promise_verified_enabled'
                 break
             case 'review_needed':
