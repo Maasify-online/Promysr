@@ -224,28 +224,31 @@ serve(async (req) => {
 
         // Determine recipient based on notification type
         let to = ""
-        let requiredPref = "" // 'daily_digest' | 'new_promises' | 'promise_updates' | 'team_activity'
+        let requiredPref = "" // Maps to actual DB columns: promise_created_enabled, review_needed_enabled, etc.
 
         switch (type) {
             case 'created':
                 to = owner_email
-                requiredPref = 'new_promises'
+                requiredPref = 'promise_created_enabled'
                 if (promise_id) {
                     (payload as any).action_url = `${APP_URL}/dashboard?action=complete&id=${promise_id}`;
                 }
                 break
             case 'missed':
                 to = leader_email || owner_email
-                requiredPref = 'promise_updates'
+                requiredPref = 'promise_missed_enabled'
                 break
             case 'closed':
+                to = leader_email || owner_email
+                requiredPref = 'promise_closed_enabled'
+                break
             case 'promise_verified':
                 to = leader_email || owner_email
-                requiredPref = 'promise_updates'
+                requiredPref = 'promise_verified_enabled'
                 break
             case 'review_needed':
                 to = leader_email!
-                requiredPref = 'new_promises' // Or team_activity
+                requiredPref = 'review_needed_enabled'
                 if (promise_id) {
                     (payload as any).action_url = `${APP_URL}/dashboard?action=verify&id=${promise_id}`;
                 }
@@ -253,11 +256,11 @@ serve(async (req) => {
             case 'due-today':
             case 'digest_user':
                 to = owner_email
-                requiredPref = 'daily_digest'
+                requiredPref = 'daily_brief_enabled'
                 break
             case 'completion_rejected':
                 to = owner_email
-                requiredPref = 'promise_updates'
+                requiredPref = 'completion_rejected_enabled'
                 break
             default:
                 throw new Error(`Invalid notification type: ${type}`)

@@ -85,7 +85,7 @@ serve(async (req) => {
 
         // A. Send Doer Briefs
         for (const [email, tasks] of doerMap.entries()) {
-            if (!checkPref(email, 'daily_digest')) {
+            if (!checkPref(email, 'daily_brief_enabled')) {
                 console.log(`Skipping Daily Digest for ${email} (Preference Off)`);
                 continue;
             }
@@ -106,7 +106,8 @@ serve(async (req) => {
 
         // B. Send Leader Radars
         for (const [email, tasks] of leaderMap.entries()) {
-            if (!checkPref(email, 'team_activity')) { // Assuming Leader Radar counts as Team Activity
+            // Note: Using daily_brief_enabled for leader emails too since team_activity column doesn't exist
+            if (!checkPref(email, 'daily_brief_enabled')) {
                 console.log(`Skipping Leader Radar for ${email} (Preference Off)`);
                 continue;
             }
