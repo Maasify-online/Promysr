@@ -120,22 +120,53 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
         case 'due-today':
         case 'digest_user':
             subject = `Your Daily Brief: ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
-            const taskList = (data.tasks || []).map((t: any) => `
-                <div style="padding: 16px; border-left: 4px solid #007AFF; background: #f8fafc; margin-bottom: 12px;">
-                    <p style="margin: 0; font-weight: 600; color: #1e293b;">"${t.text}"</p>
-                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Due by ${t.due_time || 'EOD'}</p>
-                </div>
+            const dailyTaskList = (data.tasks || []).map((t: any) => `
+                <li style="margin-bottom: 8px; color: #334155;">
+                    <span style="font-weight: 600;">${t.text}</span> (Due by ${t.due_time || 'EOD'})
+                </li>
             `).join('');
 
             html = `
                 <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: white;">
                     ${header}
-                    <p style="color: #334155; font-size: 16px;">Good Morning <strong>${data.owner_name || 'User'}</strong>,</p>
+                    <h2 style="color: #1e293b; margin-top: 0;">Good Morning ${data.owner_name || 'User'}!</h2>
                     <p style="color: #334155; font-size: 16px;">Here are your commitments due today:</p>
-                    <div style="margin: 24px 0;">
-                        ${taskList || '<p style="color: #64748b;">No tasks due today!</p>'}
+                    <ul style="list-style: none; padding: 0; margin: 24px 0;">
+                        ${dailyTaskList || '<li style="color: #64748b;">No tasks due today!</li>'}
+                    </ul>
+                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View My Promises</a>
+                </div>
+            `;
+            break;
+
+        case 'weekly_user_report':
+            subject = `📊 Your Weekly Accountability Report: Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}`;
+            const weeklyUpcomingList = data.upcoming_tasks?.map((task: any) =>
+                `<li style="margin-bottom: 8px; color: #334155;">
+                    <span style="font-weight: 600;">${task.text}</span> (Due: ${formatToIST(task.due_date)})
+                </li>`
+            ).join('') || '<li style="color: #64748b;">No upcoming tasks this week.</li>';
+
+            html = `
+                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    ${header}
+                    <h2 style="color: #1e293b; margin-top: 0;">📊 Your Weekly Report</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}</p>
+                    
+                    <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e0f2fe;">
+                        <h3 style="margin: 0 0 12px 0; color: #0369a1;">This Week's Performance</h3>
+                        <p style="margin: 4px 0; color: #075985;">✓ Completed: <strong>${data.completed_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⏳ In Progress: <strong>${data.in_progress_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⚠️ Missed: <strong>${data.missed_count || 0} promises</strong></p>
+                        ${data.integrity_score ? `<p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #0369a1;">📊 Integrity Score: ${data.integrity_score}%</p>` : ''}
                     </div>
-                    <a href="${data.action_url || `${appUrl}/user-portal`}" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">Mark as Complete</a>
+
+                    <h3 style="color: #1e293b; margin-bottom: 12px;">Upcoming Promises</h3>
+                    <ul style="list-style: none; padding: 0; margin: 24px 0;">
+                        ${weeklyUpcomingList}
+                    </ul>
+
+                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 24px;">View Full Report</a>
                 </div>
             `;
             break;
@@ -177,37 +208,6 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
                         ${data.integrity_score ? `<p style="margin: 12px 0 4px 0; color: #166534; font-size: 16px; font-weight: 600;">📊 Your Integrity Score: ${data.integrity_score}%</p>` : ''}
                     </div>
                     <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View My Stats</a>
-                </div>
-            `;
-            break;
-
-        case 'weekly_user_report':
-            subject = `📊 Weekly Accountability Report: Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}`;
-            const upcomingList = data.upcoming_tasks?.map((task: any) =>
-                `<div style="padding: 12px; background: #f8fafc; border-left: 3px solid #3b82f6; margin-bottom: 8px; border-radius: 4px;">
-                    <p style="margin: 0; font-weight: 600; color: #1e293b;">${task.text}</p>
-                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Due: ${formatToIST(task.due_date)}</p>
-                </div>`
-            ).join('') || '<p style="color: #64748b;">No upcoming tasks this week</p>';
-
-            html = `
-                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
-                    ${header}
-                    <h2 style="color: #1e293b; margin-bottom: 8px;">📊 Your Weekly Report</h2>
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}</p>
-                    
-                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
-                        <h3 style="margin: 0 0 12px 0; color: #0369a1;">This Week's Performance</h3>
-                        <p style="margin: 4px 0; color: #075985;">✓ Completed: <strong>${data.completed_count || 0} promises</strong></p>
-                        <p style="margin: 4px 0; color: #075985;">⏳ In Progress: <strong>${data.in_progress_count || 0} promises</strong></p>
-                        <p style="margin: 4px 0; color: #075985;">⚠️ Missed: <strong>${data.missed_count || 0} promises</strong></p>
-                        ${data.integrity_score ? `<p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #0369a1;">📊 Integrity Score: ${data.integrity_score}%</p>` : ''}
-                    </div>
-
-                    <h3 style="color: #1e293b; margin-bottom: 12px;">Upcoming This Week</h3>
-                    ${upcomingList}
-
-                    <a href="${appUrl}/user-portal" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 24px;">View Full Report</a>
                 </div>
             `;
             break;
