@@ -59,10 +59,9 @@ export const EmailNotificationSettings = () => {
                 title: 'New Promise Assigned',
                 preview: `<div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; margin: 0 auto; background-color: white;">
                     <div style="margin-bottom: 24px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                            <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #007AFF 0%, #00C9B7 100%); border-radius: 6px;"></div>
-                            <span style="font-weight: 800; font-size: 18px; color: #0f172a; font-family: sans-serif;">PromySr</span>
-                        </div>
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="color: #007AFF;">Sr</span>
+                        </h1>
                         <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
                     </div>
                     <h2 style="color: #007AFF; margin-top: 0;">New Promise Assigned</h2>
