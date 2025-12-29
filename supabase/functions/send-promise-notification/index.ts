@@ -272,14 +272,18 @@ serve(async (req) => {
             const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
             // Get User ID by Email (since settings are by user_id)
-            const { data: profiles } = await supabase.from('profiles').select('user_id').eq('email', to).single();
+            const { data: profiles, error: profileError } = await supabase.from('profiles').select('user_id').eq('email', to).maybeSingle();
+
+            if (profileError) {
+                console.error("Error fetching profile for preference check:", profileError);
+            }
 
             if (profiles) {
                 const { data: settings } = await supabase
                     .from('email_notification_settings')
                     .select('*')
                     .eq('user_id', profiles.user_id)
-                    .single();
+                    .maybeSingle();
 
                 // If settings exist, and the specific setting is explicitly FALSE, we skip.
                 // Default is TRUE (if row missing or null).

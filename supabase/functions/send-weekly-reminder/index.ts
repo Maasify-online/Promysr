@@ -55,6 +55,20 @@ serve(async (req) => {
 
         // Send user weekly reports
         for (const [email, data] of userPromises) {
+
+            // CHECK PREFERENCE
+            const { data: userProfile } = await supabase.from('profiles').select('user_id').eq('email', email).maybeSingle();
+            let allowEmail = true;
+            if (userProfile) {
+                const { data: settings } = await supabase.from('email_notification_settings').select('weekly_reminder_enabled').eq('user_id', userProfile.user_id).maybeSingle();
+                if (settings && settings.weekly_reminder_enabled === false) allowEmail = false;
+            }
+
+            if (!allowEmail) {
+                console.log(`Skipping Weekly Reminder for ${email} (User Pref Off)`);
+                continue;
+            }
+
             const promises = data.promises;
 
             // Calculate stats

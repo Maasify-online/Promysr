@@ -37,8 +37,8 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
     // State for Member Mode (Who acts as Leader?)
     const [accountabilityTarget, setAccountabilityTarget] = useState<'self' | 'leader'>('self');
 
-    // Smart Default: Tomorrow
-    const defaultDate = addDays(new Date(), 1).toISOString().split('T')[0];
+    // Smart Default: Today
+    const defaultDate = new Date().toISOString().split('T')[0];
     const [dueDate, setDueDate] = useState(defaultDate);
 
     // Find Leader ID if needed (First admin found)
@@ -226,7 +226,12 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
                                             mode="single"
                                             selected={dueDate ? new Date(dueDate) : undefined}
                                             onSelect={(date) => date && setDueDate(format(date, 'yyyy-MM-dd'))}
-                                            disabled={(date) => date < new Date()}
+                                            // Allow selection of Today by comparing against start of today (00:00)
+                                            disabled={(date) => {
+                                                const today = new Date();
+                                                today.setHours(0, 0, 0, 0);
+                                                return date < today;
+                                            }}
                                             initialFocus
                                         />
                                     </PopoverContent>

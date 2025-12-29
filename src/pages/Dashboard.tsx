@@ -90,13 +90,21 @@ const Dashboard = () => {
   useEffect(() => {
     let mounted = true;
 
+    // Safety Timeout to prevent infinite loading
+    const safetyTimer = setTimeout(() => {
+      if (isLoading) {
+        console.warn("Safety timeout triggered: Forcing dashboard load.");
+        setIsLoading(false);
+      }
+    }, 8000); // 8 seconds max load time
+
     const initAuth = async () => {
       try {
         // 1. Initial Session Check
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session) {
-          // Immediately set minimal data to show dashboard
+          // Immediately set minimal data to show dashboard (Optimistic UI)
           const userEmail = session.user.email || 'user@example.com';
           const userName = userEmail.split('@')[0].replace(/[._+]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 
@@ -108,6 +116,7 @@ const Dashboard = () => {
             subscription_status: 'trial'
           });
 
+          // Set temporary Org Data to unblock UI immediately
           setOrganization({
             id: 'temp-org',
             name: 'My Organization',
@@ -128,12 +137,19 @@ const Dashboard = () => {
 
           setUserRole('admin');
           setIsLoading(false);
+          clearTimeout(safetyTimer); // Clear safety timer on success
 
           // Load real data in background
           if (mounted) checkAuthAndLoadData(session);
         } else {
-          // No session - redirect to login after brief delay
-          if (!window.location.hash.includes('access_token')) {
+          // No session
+          if (window.location.hash.includes('access_token')) {
+            console.log("Processing Magic Link...");
+            // Do NOT turn off loading, let onAuthStateChange handle it.
+            // Safety timer will save us if it fails.
+          } else {
+            console.log("No session found, redirecting...");
+            // Allow redirect to happen
             setTimeout(() => {
               if (mounted) {
                 window.location.href = '/login';
