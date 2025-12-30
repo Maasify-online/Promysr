@@ -678,25 +678,28 @@ export const EmailNotificationSettings = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <Label>Days</Label>
-                                                <div className="flex gap-2 flex-wrap">
-                                                    {DAYS.map(day => (
-                                                        <Button
-                                                            key={day.value}
-                                                            variant={settings.daily_brief_days.includes(day.value) ? 'default' : 'outline'}
-                                                            size="sm"
-                                                            onClick={() => toggleDay(day.value)}
-                                                            className="w-14"
-                                                        >
-                                                            {day.label}
-                                                        </Button>
-                                                    ))}
-                                                </div>
+                                        </div>
+
+
+                                        <div className="space-y-2">
+                                            <Label>Days</Label>
+                                            <div className="flex gap-2 flex-wrap">
+                                                {DAYS.map(day => (
+                                                    <Button
+                                                        key={day.value}
+                                                        variant={settings.daily_brief_days.includes(day.value) ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => toggleDay(day.value)}
+                                                        className="w-14"
+                                                    >
+                                                        {day.label}
+                                                    </Button>
+                                                ))}
                                             </div>
-                                        </>
+                                        </div>
+                                    </>
                                 )}
-                                    </div>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
 
@@ -815,26 +818,28 @@ export const EmailNotificationSettings = () => {
                                                     </Select>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div className="space-y-2">
-                                                <Label>Frequency</Label>
-                                                <Select
-                                                    value={settings.weekly_reminder_frequency}
-                                                    onValueChange={(value) => setSettings({ ...settings, weekly_reminder_frequency: value })}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="weekly">Weekly</SelectItem>
-                                                        <SelectItem value="biweekly">Bi-weekly (Every 2 weeks)</SelectItem>
-                                                        <SelectItem value="monthly">Monthly (Every 4 weeks)</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </>
+
+                                        <div className="space-y-2">
+                                            <Label>Frequency</Label>
+                                            <Select
+                                                value={settings.weekly_reminder_frequency}
+                                                onValueChange={(value) => setSettings({ ...settings, weekly_reminder_frequency: value })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="weekly">Weekly</SelectItem>
+                                                    <SelectItem value="biweekly">Bi-weekly (Every 2 weeks)</SelectItem>
+                                                    <SelectItem value="monthly">Monthly (Every 4 weeks)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </>
                                 )}
-                                    </div>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
@@ -863,6 +868,6 @@ export const EmailNotificationSettings = () => {
                     />
                 </DialogContent>
             </Dialog>
-        </Card>
+        </Card >
     );
 };

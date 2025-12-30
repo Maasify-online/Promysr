@@ -561,38 +561,75 @@ const Dashboard = () => {
       return;
     }
 
-    // 2. If Open -> Submit for Verification
+    // 2. If Open -> Check if Self-Verification (Leader is completing) or Submit for Verification
     if (currentStatus === 'Open') {
-      const { error } = await supabase.from("promises").update({ status: 'Pending Verification' }).eq("id", id);
-      if (error) { toast.error("Failed to update status"); return; }
-      toast.success("Submitted for Verification");
+      const isSelfVerification = promiseData.leader_id === profile?.id;
 
-      // Notify Leader for Review
-      try {
-        // Fetch Leader Info first
-        // ... actually we have profile (current user) but we need leader email.
-        // Usually promise has leader_id.
-        // We need to fetch promise details to get leader_id -> then leader profile.
-        const { data: fullPromise } = await supabase.from('promises').select('*, leader:leader_id(email, full_name)').eq('id', id).single();
+      if (isSelfVerification) {
+        // SKIP VERIFICATION -> DIRECT CLOSE
+        const { error } = await supabase.from("promises").update({ status: 'Closed' }).eq("id", id);
+        if (error) { toast.error("Failed to update status"); return; }
 
-        if (fullPromise && fullPromise.leader) {
+        // Send closure notification (Self-verified)
+        try {
           const now = new Date();
+          // Calculate integrity score (optional, reused logic)
+          const { data: userPromises } = await supabase.from('promises').select('status').eq('owner_email', promiseData.owner_email);
+          let integrityScore = null;
+          if (userPromises && userPromises.length >= 3) {
+            const closed = userPromises.filter(p => p.status === 'Closed').length;
+            const missed = userPromises.filter(p => p.status === 'Missed').length;
+            const total = closed + missed;
+            if (total > 0) integrityScore = Math.round((closed / total) * 100);
+          }
+
           await supabase.functions.invoke('send-promise-notification', {
             body: {
-              type: 'review_needed',
-              promise_text: fullPromise.promise_text,
-              due_date: fullPromise.due_date,
-              owner_email: profile?.email,
-              owner_name: profile?.full_name,
-              leader_email: fullPromise.leader.email, // Notify the leader
-              leader_name: fullPromise.leader.full_name,
+              type: 'promise_verified', // Treat as verified since leader closed it
+              promise_text: promiseData.promise_text,
+              due_date: promiseData.due_date,
+              owner_email: promiseData.owner_email,
+              owner_name: promiseData.owner_name,
+              leader_name: profile?.full_name,
               completed_at: now.toISOString(),
-              promise_id: id
+              integrity_score: integrityScore
             }
           });
+          console.log('Self-verified email sent');
+        } catch (err) {
+          console.error("Failed to notify self-close:", err);
         }
-      } catch (err) {
-        console.error("Failed to notify leader:", err);
+
+        toast.success("Promise Kept (Self-Verified)!");
+      } else {
+        // STANDARD FLOW -> PENDING VERIFICATION
+        const { error } = await supabase.from("promises").update({ status: 'Pending Verification' }).eq("id", id);
+        if (error) { toast.error("Failed to update status"); return; }
+        toast.success("Submitted for Verification");
+
+        // Notify Leader for Review
+        try {
+          const { data: fullPromise } = await supabase.from('promises').select('*, leader:leader_id(email, full_name)').eq('id', id).single();
+
+          if (fullPromise && fullPromise.leader) {
+            const now = new Date();
+            await supabase.functions.invoke('send-promise-notification', {
+              body: {
+                type: 'review_needed',
+                promise_text: fullPromise.promise_text,
+                due_date: fullPromise.due_date,
+                owner_email: profile?.email,
+                owner_name: profile?.full_name,
+                leader_email: fullPromise.leader.email,
+                leader_name: fullPromise.leader.full_name,
+                completed_at: now.toISOString(),
+                promise_id: id
+              }
+            });
+          }
+        } catch (err) {
+          console.error("Failed to notify leader:", err);
+        }
       }
 
       checkAuthAndLoadData();
