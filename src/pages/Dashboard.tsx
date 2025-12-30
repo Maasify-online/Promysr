@@ -630,7 +630,11 @@ const Dashboard = () => {
         toast.error("Email Failed: " + (emailError.message || JSON.stringify(emailError)));
       } else {
         console.log('✅ Email notification sent successfully:', emailResponse);
-        // toast.success("Confirmation Email Sent"); 
+        // Check for silent logging errors from backend
+        if (emailResponse && (emailResponse as any).logError) {
+          console.error('⚠️ Email sent but logging failed:', (emailResponse as any).logError);
+          toast.error("Email Log Failed: " + JSON.stringify((emailResponse as any).logError));
+        }
       }
     } catch (emailErr) {
       console.error('❌ Failed to send email notification (exception):', emailErr);
