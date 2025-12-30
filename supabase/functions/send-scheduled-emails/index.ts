@@ -15,8 +15,23 @@ serve(async (req) => {
     try {
         const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
-        // Get current time in UTC
-        const now = new Date()
+        // Check for Debug Time Override
+        const method = req.method
+        let debugNowTime = null
+        if (method === 'POST') {
+            try {
+                const body = await req.json()
+                if (body.debugNow) {
+                    debugNowTime = new Date(body.debugNow)
+                    console.log(`⚠️ DEBUG MODE: Using Time Override: ${debugNowTime.toISOString()}`)
+                }
+            } catch (e) {
+                // Squelch JSON parse errors on empty body
+            }
+        }
+
+        // Get current time in UTC (or override)
+        const now = debugNowTime || new Date()
         const currentUTCHour = now.getUTCHours()
         // We do NOT use global day anymore, as it differs per user timezone
         console.log(`Scheduler running at ${now.toISOString()} (UTC Hour: ${currentUTCHour})`)
@@ -109,11 +124,53 @@ serve(async (req) => {
                 if (isRightTime && isRightDay) {
                     console.log(`Sending Daily Brief to ${userEmail} (scheduled for ${userHour}:00 ${userTimezone})`)
 
-                    // Call send-morning-brief for this specific user
+                    // Call send-morning-brief for this specific user (SCOPE: USER)
                     await supabase.functions.invoke('send-morning-brief', {
-                        body: { userEmail }
+                        body: { userEmail, scope: 'user' }
                     })
 
+                    dailyBriefCount++
+                }
+            }
+
+            // --- LEADER RADAR LOGIC ---
+            if (settings.leader_daily_radar_enabled) {
+                const [leaderHour, leaderMinute] = (settings.leader_daily_radar_time || '09:00:00').split(':').map(Number)
+                const leaderDays = ["monday", "tuesday", "wednesday", "thursday", "friday"] // Default weekdays for now
+                const leaderTimezone = settings.leader_report_timezone || settings.daily_brief_timezone || 'Asia/Kolkata'
+
+                // Re-calculate UTC target for Leader time
+                let utcOffset = 0
+                switch (leaderTimezone) {
+                    case 'UTC': utcOffset = 0; break;
+                    case 'Asia/Kolkata': utcOffset = 5.5; break;
+                    case 'America/New_York': utcOffset = -5; break;
+                    case 'America/Los_Angeles': utcOffset = -8; break;
+                    case 'Europe/London': utcOffset = 0; break;
+                    case 'Asia/Tokyo': utcOffset = 9; break;
+                    default: utcOffset = 0;
+                }
+
+                const targetUTC = (leaderHour + (leaderMinute / 60) - utcOffset + 24) % 24
+                const currentUTC = now.getUTCHours() + (now.getUTCMinutes() / 60)
+
+                const userDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: leaderTimezone }).toLowerCase()
+
+                const timeDiff = Math.abs(targetUTC - currentUTC)
+                const wrapDiff = 24 - timeDiff
+                const isRightTime = (timeDiff < 0.1) || (wrapDiff < 0.1)
+                const isRightDay = leaderDays.includes(userDayOfWeek)
+
+                if (isRightTime && isRightDay) {
+                    console.log(`Sending Leader Radar to ${userEmail} (scheduled for ${leaderHour}:00 ${leaderTimezone})`)
+
+                    // Call send-morning-brief for this leader (SCOPE: LEADER)
+                    await supabase.functions.invoke('send-morning-brief', {
+                        body: { userEmail, scope: 'leader' }
+                    })
+
+                    // We count this toward dailyBriefCount for summary, or track separately?
+                    // Let's track nicely if we want, but simpler to just increment.
                     dailyBriefCount++
                 }
             }

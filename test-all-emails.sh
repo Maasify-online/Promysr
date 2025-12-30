@@ -112,7 +112,7 @@ curl -X POST "${BASE_URL}/send-morning-brief" \
 echo ""
 sleep 3
 
-# 8. Weekly Reminder
+# 8. Weekly Reminder (Direct Test)
 echo "📧 [8/8] Sending Weekly Reminder..."
 curl -X POST "${BASE_URL}/send-weekly-reminder" \
   -H "Authorization: Bearer ${JWT}" \
@@ -120,8 +120,52 @@ curl -X POST "${BASE_URL}/send-weekly-reminder" \
   -d '{
     "userEmail": "info@maasify.online"
   }'
-echo ""
 
 echo ""
-echo "✅ All 8 emails sent!"
-echo "📬 Check info@maasify.online inbox in ~30 seconds"
+echo "---------------------------------------------------"
+echo "🕒 STARTING TIME TRAVEL SIMULATIONS (Scoped Tests)"
+echo "---------------------------------------------------"
+
+# 9. SCENARIO A: User Morning (8:00 AM IST)
+# 8:00 AM IST = 02:30 UTC
+# Should trigger: User Daily Brief (Scope: User) + User Missed Report (Scope: User)
+echo "🚀 [Scenario A] Simulating 8:00 AM IST (User Brief Time)..."
+curl -X POST "${BASE_URL}/send-scheduled-emails" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "debugNow": "2025-12-30T02:30:00Z"
+  }'
+echo ""
+sleep 3
+
+# 10. SCENARIO B: Leader Morning (9:00 AM IST)
+# 9:00 AM IST = 03:30 UTC
+# Should trigger: Leader Daily Radar (Scope: Leader) + Leader Missed Report (Scope: Leader)
+echo "🚀 [Scenario B] Simulating 9:00 AM IST (Leader Radar Time)..."
+curl -X POST "${BASE_URL}/send-scheduled-emails" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "debugNow": "2025-12-30T03:30:00Z"
+  }'
+echo ""
+sleep 3
+
+# 11. SCENARIO C: Weekly Reminder (Monday 10:00 AM IST)
+# 10:00 AM IST = 04:30 UTC
+# Should trigger: Weekly Reminders
+echo "🚀 [Scenario C] Simulating Monday 10:00 AM IST (Weekly Reminder)..."
+# Note: Ensure the date used is actually a Monday
+curl -X POST "${BASE_URL}/send-scheduled-emails" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "debugNow": "2025-12-29T04:30:00Z"
+  }'
+
+echo ""
+echo "✅ All tests completed!"
+echo "📬 Check logs and inbox for Scoped Emails:"
+echo "   - Scenario A should deliver 'Your Daily Brief' ONLY"
+echo "   - Scenario B should deliver 'Leader Daily Radar' ONLY"

@@ -19,6 +19,22 @@ serve(async (req) => {
     try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+        // Parse Request Body for Targeting
+        const body = req.method === 'POST' ? await req.json() : {};
+        const targetUserEmail = body.userEmail || null;
+        const scope = body.scope || 'all'; // 'user', 'leader', 'all'
+
+        // Resolve Target ID if needed
+        let targetUserId = null;
+        if (targetUserEmail) {
+            const { data: uProfile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', targetUserEmail)
+                .single();
+            targetUserId = uProfile?.id;
+        }
+
         // 1. Calculate Target Date (Yesterday IST)
         // Runs at 10 AM IST (04:30 UTC). We want promises missed "Yesterday".
         // 04:30 UTC today maps to 10:00 AM IST. 
@@ -38,14 +54,21 @@ serve(async (req) => {
         });
         const targetDateStr = formatter.format(yesterday);
 
-        console.log(`Sending reports for Missed Promises due on: ${targetDateStr} (IST)`);
+        console.log(`Sending reports for Missed Promises due on: ${targetDateStr} (IST) [Scope: ${scope}, Target: ${targetUserEmail || 'ALL'}]`);
 
-        // 2. Fetch Missed Promises matching that due date
-        const { data: missedPromises, error } = await supabase
+        // 2. Fetch Missed Promises
+        let query = supabase
             .from('promises')
             .select('*')
             .eq('status', 'Missed')
             .eq('due_date', targetDateStr);
+
+        // Apply Targeting Filter
+        if (targetUserEmail && targetUserId) {
+            query = query.or(`owner_email.eq.${targetUserEmail},leader_id.eq.${targetUserId}`)
+        }
+
+        const { data: missedPromises, error } = await query;
 
         if (error) throw error;
 
@@ -56,25 +79,13 @@ serve(async (req) => {
             });
         }
 
-        // 3. Group by Leader and Owner for Batching
+        // 3. Grouping
         const leaderMap = new Map();
         const ownerMap = new Map();
-        const profileMap = new Map(); // Cache profiles
+        const profileMap = new Map();
 
-        // Helper to fetch/cache profile
-        /* In a real scenario with many rows, we might fetch all relevant profiles in one query using 'in' filter.
-           For batch size < 1000, fetching all profiles or iterating is okay. Let's fetch all relevant IDs. */
-        const allUserIds = new Set([
-            ...missedPromises.map(p => p.leader_id),
-            // We lack owner_id column usually, relying on email? 
-            // PromysrPromise uses owner_email. Profiles table maps email <-> id.
-            // We need profiles to get names if not in promise object (owner_name is in promise).
-        ]);
-
-        // Let's get unique emails too to map owner emails to user IDs if needed 
-        const allOwnerEmails = new Set(missedPromises.map(p => p.owner_email));
-
-        // Fetch profiles for leaders
+        // Collect Profiles
+        const allUserIds = new Set(missedPromises.map(p => p.leader_id));
         const { data: profiles } = await supabase
             .from('profiles')
             .select('id, email, full_name')
@@ -83,54 +94,65 @@ serve(async (req) => {
         profiles?.forEach(p => profileMap.set(p.id, p));
 
         missedPromises.forEach(p => {
-            // Group for Leader (The one who needs to know their team failed)
-            const leader = profileMap.get(p.leader_id);
-            if (leader) {
-                if (!leaderMap.has(leader.email)) {
-                    leaderMap.set(leader.email, { name: leader.full_name, tasks: [] });
+            // Group Leader (if target matches leader)
+            if (!targetUserId || p.leader_id === targetUserId) {
+                const leader = profileMap.get(p.leader_id);
+                if (leader) {
+                    if (!leaderMap.has(leader.email)) {
+                        leaderMap.set(leader.email, { name: leader.full_name, tasks: [] });
+                    }
+                    leaderMap.get(leader.email).tasks.push(p);
                 }
-                leaderMap.get(leader.email).tasks.push(p);
             }
 
-            // Group for Owner (The one who failed)
-            if (!ownerMap.has(p.owner_email)) {
-                ownerMap.set(p.owner_email, { name: p.owner_name, tasks: [] });
+            // Group Owner (if target matches owner)
+            if (!targetUserEmail || p.owner_email === targetUserEmail) {
+                if (!ownerMap.has(p.owner_email)) {
+                    ownerMap.set(p.owner_email, { name: p.owner_name, tasks: [] });
+                }
+                ownerMap.get(p.owner_email).tasks.push(p);
             }
-            ownerMap.get(p.owner_email).tasks.push(p);
         });
 
-        // 4. Send Batched Emails
+        // 4. Send Emails (Scoped)
         let sentCount = 0;
 
-        // A. Send to Leaders
-        for (const [email, data] of leaderMap.entries()) {
-            const { subject, html } = getEmailTemplate('missed_digest_leader', {
-                leader_name: data.name,
-                missed_date: targetDateStr,
-                tasks: data.tasks.map(t => ({
-                    text: t.promise_text,
-                    owner: t.owner_name
-                }))
-            });
+        // A. Send to Leaders (Scope: 'leader' or 'all')
+        if (scope === 'leader' || scope === 'all') {
+            for (const [email, data] of leaderMap.entries()) {
+                // If targeting, redundant check but safe
+                if (targetUserEmail && email !== targetUserEmail) continue;
 
-            await sendEmail(email, subject, html);
-            sentCount++;
+                const { subject, html } = getEmailTemplate('missed_digest_leader', {
+                    leader_name: data.name,
+                    missed_date: targetDateStr,
+                    tasks: data.tasks.map((t: any) => ({
+                        text: t.promise_text,
+                        owner: t.owner_name
+                    }))
+                });
+
+                await sendEmail(email, subject, html);
+                sentCount++;
+            }
         }
 
-        // B. Send to Owners
-        for (const [email, data] of ownerMap.entries()) {
-            const { subject, html } = getEmailTemplate('missed_digest_owner', {
-                owner_name: data.name,
-                missed_date: targetDateStr,
-                tasks: data.tasks.map(t => ({
-                    text: t.promise_text
-                }))
-            });
+        // B. Send to Owners (Scope: 'user' or 'all')
+        if (scope === 'user' || scope === 'all') {
+            for (const [email, data] of ownerMap.entries()) {
+                if (targetUserEmail && email !== targetUserEmail) continue;
 
-            // Don't double send if leader == owner (self assigned), but usually reports are distinct
-            // Assuming unique emails map handles distinct sends.
-            await sendEmail(email, subject, html);
-            sentCount++;
+                const { subject, html } = getEmailTemplate('missed_digest_owner', {
+                    owner_name: data.name,
+                    missed_date: targetDateStr,
+                    tasks: data.tasks.map((t: any) => ({
+                        text: t.promise_text
+                    }))
+                });
+
+                await sendEmail(email, subject, html);
+                sentCount++;
+            }
         }
 
         return new Response(JSON.stringify({ sent: sentCount }), {

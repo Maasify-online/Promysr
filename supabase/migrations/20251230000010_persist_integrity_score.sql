@@ -6,20 +6,29 @@ ADD COLUMN IF NOT EXISTS integrity_score INTEGER DEFAULT 0;
 CREATE OR REPLACE FUNCTION public.calculate_user_integrity_score(target_user_id UUID)
 RETURNS INTEGER AS $$
 DECLARE
+    target_email TEXT;
     closed_count INTEGER;
     missed_count INTEGER;
     total_count INTEGER;
     new_score INTEGER;
 BEGIN
+    -- Get User Email
+    SELECT email INTO target_email FROM public.profiles WHERE id = target_user_id;
+
+    -- If no email found, exit
+    IF target_email IS NULL THEN
+        RETURN 0;
+    END IF;
+
     -- Count Closed promises (Kept)
     SELECT COUNT(*) INTO closed_count
     FROM public.promises
-    WHERE user_id = target_user_id AND status = 'Closed';
+    WHERE owner_email = target_email AND status = 'Closed';
 
     -- Count Missed promises
     SELECT COUNT(*) INTO missed_count
     FROM public.promises
-    WHERE user_id = target_user_id AND status = 'Missed';
+    WHERE owner_email = target_email AND status = 'Missed';
 
     total_count := closed_count + missed_count;
 
@@ -27,16 +36,13 @@ BEGIN
     IF total_count > 0 THEN
         new_score := ROUND((closed_count::NUMERIC / total_count::NUMERIC) * 100);
     ELSE
-        -- Default to 100 or 0? 
-        -- Front end used 100 for new users usually (innocent until proven guilty)
-        -- But logic says 0 completed. Let's stick to 100 for "Potential".
         new_score := 100;
     END IF;
 
     -- Update Profile
     UPDATE public.profiles
     SET integrity_score = new_score
-    WHERE user_id = target_user_id;
+    WHERE id = target_user_id;
 
     RETURN new_score;
 END;
@@ -45,19 +51,22 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Trigger Function
 CREATE OR REPLACE FUNCTION public.trigger_update_integrity_score()
 RETURNS TRIGGER AS $$
-BEGIN
-    -- Recalculate for the user who owns the promise
-    -- NEW.user_id for inserts/updates
-    -- OLD.user_id for deletes (if applicable)
-    
-    IF (TG_OP = 'DELETE') THEN
-        PERFORM public.calculate_user_integrity_score(OLD.user_id);
-    ELSE
-        PERFORM public.calculate_user_integrity_score(NEW.user_id);
-    END IF;
-    
-    RETURN NULL;
-END;
+    -- Recalculate based on OWNER EMAIL
+    DECLARE
+        target_uid UUID;
+    BEGIN
+        IF (TG_OP = 'DELETE') THEN
+            SELECT id INTO target_uid FROM public.profiles WHERE email = OLD.owner_email;
+        ELSE
+            SELECT id INTO target_uid FROM public.profiles WHERE email = NEW.owner_email;
+        END IF;
+
+        IF target_uid IS NOT NULL THEN
+             PERFORM public.calculate_user_integrity_score(target_uid);
+        END IF;
+
+        RETURN NULL;
+    END;
 $$ LANGUAGE plpgsql;
 
 -- Create Trigger on Promises
@@ -72,7 +81,7 @@ DO $$
 DECLARE
     r RECORD;
 BEGIN
-    FOR r IN SELECT user_id FROM public.profiles LOOP
+    FOR r IN SELECT id as user_id FROM public.profiles LOOP
         PERFORM public.calculate_user_integrity_score(r.user_id);
     END LOOP;
 END;

@@ -29,6 +29,9 @@ interface EmailSettings {
     weekly_reminder_time: string;
     weekly_reminder_timezone: string;
     weekly_reminder_frequency: string;
+    leader_daily_radar_time: string;
+    leader_weekly_report_time: string;
+    leader_report_timezone: string;
 }
 
 const DAYS = [
@@ -341,12 +344,15 @@ export const EmailNotificationSettings = () => {
                     completion_rejected_enabled: true,
                     promise_verified_enabled: true,
                     daily_brief_time: '08:00:00',
-                    daily_brief_timezone: 'UTC',
+                    daily_brief_timezone: 'Asia/Kolkata', // Default to IST
                     daily_brief_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
                     weekly_reminder_day: 'monday',
                     weekly_reminder_time: '10:00:00',
                     weekly_reminder_timezone: 'Asia/Kolkata',
-                    weekly_reminder_frequency: 'weekly'
+                    weekly_reminder_frequency: 'weekly',
+                    leader_daily_radar_time: '08:00:00',
+                    leader_weekly_report_time: '09:00:00',
+                    leader_report_timezone: 'Asia/Kolkata'
                 };
 
                 const { data: newSettings, error: insertError } = await supabase
@@ -640,6 +646,44 @@ export const EmailNotificationSettings = () => {
                                         />
                                     </div>
                                 </div>
+                                {settings.leader_daily_radar_enabled && (
+                                    <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
+                                        <div className="flex gap-2">
+                                            <div className="w-full">
+                                                <Label className="text-xs text-muted-foreground mb-1 block">Radar Time</Label>
+                                                <Select
+                                                    value={settings.leader_daily_radar_time?.substring(0, 5) || '08:00'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_daily_radar_time: value + ':00' })}
+                                                >
+                                                    <SelectTrigger className="h-8">
+                                                        <SelectValue placeholder="Time" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIME_SLOTS.map(time => (
+                                                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="w-[180px]">
+                                                <Label className="text-xs text-muted-foreground mb-1 block">Team Timezone</Label>
+                                                <Select
+                                                    value={settings.leader_report_timezone || 'Asia/Kolkata'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_report_timezone: value })}
+                                                >
+                                                    <SelectTrigger className="h-8">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIMEZONES.map(tz => (
+                                                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {settings.daily_brief_enabled && (
                                     <>
@@ -762,6 +806,26 @@ export const EmailNotificationSettings = () => {
                                         />
                                     </div>
                                 </div>
+                                {settings.leader_weekly_report_enabled && (
+                                    <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
+                                        <div className="w-full">
+                                            <Label className="text-xs text-muted-foreground mb-1 block">Report Time</Label>
+                                            <Select
+                                                value={settings.leader_weekly_report_time?.substring(0, 5) || '09:00'}
+                                                onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_time: value + ':00' })}
+                                            >
+                                                <SelectTrigger className="h-8 w-[140px]">
+                                                    <SelectValue placeholder="Time" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {TIME_SLOTS.map(time => (
+                                                        <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {settings.weekly_reminder_enabled && (
                                     <>

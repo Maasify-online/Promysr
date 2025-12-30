@@ -51,18 +51,22 @@ CREATE TRIGGER update_email_notification_settings_updated_at
 -- RLS Policies
 ALTER TABLE email_notification_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own settings" ON email_notification_settings;
 CREATE POLICY "Users can view own settings"
     ON email_notification_settings FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own settings" ON email_notification_settings;
 CREATE POLICY "Users can update own settings"
     ON email_notification_settings FOR UPDATE
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own settings" ON email_notification_settings;
 CREATE POLICY "Users can insert own settings"
     ON email_notification_settings FOR INSERT
     WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own settings" ON email_notification_settings;
 CREATE POLICY "Users can delete own settings"
     ON email_notification_settings FOR DELETE
     USING (auth.uid() = user_id);
