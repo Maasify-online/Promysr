@@ -356,8 +356,7 @@ serve(async (req) => {
             })
         })
 
-        const data = await res.json()
-
+        let logErrorDetail = null;
         // Log the email if sent successfully
         if (res.ok) {
             try {
@@ -368,7 +367,7 @@ serve(async (req) => {
                     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
                     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-                    await supabaseAdmin.from('emails_log').insert({
+                    const { error: insertError } = await supabaseAdmin.from('emails_log').insert({
                         promise_id: promise_id || null,
                         email_type: type,
                         recipient_email: to,
@@ -376,13 +375,25 @@ serve(async (req) => {
                         status: 'sent',
                         sent_at: new Date().toISOString()
                     })
+
+                    if (insertError) {
+                        console.error('Error logging email (Insert Failed):', insertError)
+                        logErrorDetail = insertError;
+                    }
                 }
             } catch (logError) {
-                console.error('Error logging email:', logError)
+                console.error('Error logging email (Exception):', logError)
+                logErrorDetail = logError;
             }
         }
 
-        return new Response(JSON.stringify(data), {
+        const responseData = await res.json()
+        if (logErrorDetail) {
+            // Append log error to response so we can see it in frontend
+            (responseData as any).logError = logErrorDetail;
+        }
+
+        return new Response(JSON.stringify(responseData), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: res.status
         })
