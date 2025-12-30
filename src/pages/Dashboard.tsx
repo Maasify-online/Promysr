@@ -626,10 +626,11 @@ const Dashboard = () => {
 
       if (emailError) {
         console.error('❌ Email notification failed:', emailError);
-        console.error('Error details:', JSON.stringify(emailError, null, 2));
-        // Don't block the UI - email is supplementary
+        // Show error to user for debugging
+        toast.error("Email Failed: " + (emailError.message || JSON.stringify(emailError)));
       } else {
         console.log('✅ Email notification sent successfully:', emailResponse);
+        // toast.success("Confirmation Email Sent"); 
       }
     } catch (emailErr) {
       console.error('❌ Failed to send email notification (exception):', emailErr);
