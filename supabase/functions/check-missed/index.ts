@@ -17,17 +17,25 @@ serve(async (req) => {
     )
 
     try {
-        // 1. Get Today's Date (YYYY-MM-DD)
-        const today = new Date().toISOString().split('T')[0]
-        console.log(`Checking for promises due before: ${today}`)
+        // 1. Get Today's Date in IST (Asia/Kolkata)
+        // We want to mark promises as missed if due_date < Today (IST)
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const todayIST = formatter.format(now); // YYYY-MM-DD
 
-        // 2. Fetch Open Promises where due_date < today
-        // Note: 'lt' string comparison works for YYYY-MM-DD
+        console.log(`Checking for promises due before: ${todayIST} (IST)`)
+
+        // 2. Fetch Open Promises where due_date < todayIST
         const { data: missedPromises, error: fetchError } = await supabase
             .from('promises')
             .select('*')
             .eq('status', 'Open')
-            .lt('due_date', today)
+            .lt('due_date', todayIST)
 
         if (fetchError) {
             throw fetchError
@@ -42,7 +50,7 @@ serve(async (req) => {
             )
         }
 
-        // 3. Update Status to 'Missed'
+        // 3. Update Status to 'Missed' (Silently - No Email)
         const updates = missedPromises.map(async (promise) => {
             // Update DB
             const { error: updateError } = await supabase
@@ -55,47 +63,7 @@ serve(async (req) => {
                 return null
             }
 
-            // Send missed notification email
-            try {
-                // Fetch leader info from profiles
-                const { data: leaderProfile } = await supabase
-                    .from('profiles')
-                    .select('email, full_name')
-                    .eq('id', promise.leader_id)
-                    .single()
-
-                // Invoke email notification Edge Function
-                const emailResponse = await fetch(
-                    `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-promise-notification`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
-                        },
-                        body: JSON.stringify({
-                            type: 'missed',
-                            promise_text: promise.promise_text,
-                            due_date: promise.due_date,
-                            owner_email: promise.owner_email,
-                            owner_name: promise.owner_name,
-                            leader_email: leaderProfile?.email,
-                            leader_name: leaderProfile?.full_name
-                        })
-                    }
-                )
-
-                if (!emailResponse.ok) {
-                    console.error(`Failed to send missed notification for promise ${promise.id}`)
-                } else {
-                    console.log(`Sent missed notification for promise ${promise.id}`)
-                }
-            } catch (emailErr) {
-                console.error(`Email notification error for promise ${promise.id}:`, emailErr)
-                // Non-blocking - continue with status update
-            }
-
-            console.log(`Marked promise ${promise.id} as Missed.`)
+            console.log(`Marked promise ${promise.id} as Missed. (Silent Update)`)
             return promise.id
         })
 
