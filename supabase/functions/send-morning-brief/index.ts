@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getEmailTemplate } from '../_shared/emailTemplates.ts'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -73,12 +74,6 @@ serve(async (req) => {
 
         // Helper to check preference (Default TRUE)
         const checkPref = (email: string, key: string, userId?: string) => {
-            // Find user ID from email if not provided (inefficient but safe for now)
-            // Better: We should have mapped email->ID earlier.
-            // Let's use the profileMap from Step 3.
-            // We need to inverse map or iterate.
-
-            // Optimization: Since we have profileMap (ID -> Profile), let's find ID by Email
             let uid = userId;
             if (!uid) {
                 for (const [id, prof] of profileMap.entries()) {
@@ -93,32 +88,46 @@ serve(async (req) => {
             return settings[key] === true;
         }
 
-        // 4. SEND EMAILS (Batched)
+        // 4. SEND EMAILS (Batched) - NOW USING HTML TEMPLATES
 
-        // A. Send Doer Briefs
+        // A. Send Doer Briefs (Using shared template)
         for (const [email, tasks] of doerMap.entries()) {
             if (!checkPref(email, 'daily_brief_enabled')) {
                 console.log(`Skipping Daily Digest for ${email} (Preference Off)`);
                 continue;
             }
 
-            const taskList = tasks.map((t: any) => `- ${t.promise_text} (${t.status})`).join('\n');
+            // Get owner name from profile
+            const ownerProfile = Array.from(profileMap.values()).find(p => p.email === email);
+
+            // Format tasks for template
+            const formattedTasks = tasks.map((t: any) => ({
+                text: t.promise_text,
+                due_time: t.due_time || 'EOD',
+                status: t.status
+            }));
+
+            // Use shared email template
+            const { subject, html } = getEmailTemplate('due-today', {
+                owner_name: ownerProfile?.full_name || 'User',
+                tasks: formattedTasks
+            });
+
             const res = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
                 body: JSON.stringify({
-                    from: 'PromySr <noreply@mail.promysr.com>', // Custom domain email
+                    from: 'PromySr <noreply@mail.promysr.com>',
                     to: [email],
-                    subject: `☀️ Morning Brief: ${tasks.length} Priorities`,
-                    text: `Good Morning,\n\nYou have ${tasks.length} commitments requiring attention today:\n\n${taskList}\n\nLogin to close them: ${APP_URL}/dashboard`
+                    subject: subject,
+                    html: html
                 })
             });
             if (!res.ok) console.error(`Resend Error (Doer): ${res.status} ${await res.text()}`);
         }
 
-        // B. Send Leader Radars
+        // B. Send Leader Radars (Plain text for now, can be templated later)
         for (const [email, tasks] of leaderMap.entries()) {
-            // Note: Using daily_brief_enabled for leader emails too since team_activity column doesn't exist
             if (!checkPref(email, 'daily_brief_enabled')) {
                 console.log(`Skipping Leader Radar for ${email} (Preference Off)`);
                 continue;
@@ -129,7 +138,7 @@ serve(async (req) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
                 body: JSON.stringify({
-                    from: 'PromySr <noreply@mail.promysr.com>', // Custom domain email
+                    from: 'PromySr <noreply@mail.promysr.com>',
                     to: [email],
                     subject: `👑 Leader Radar: ${tasks.length} Team Risks`,
                     text: `Leader Briefing,\n\nYour team has ${tasks.length} items due today or overdue:\n\n${teamList}\n\nCheck the Leader Command Center: ${APP_URL}/dashboard`
