@@ -50,6 +50,12 @@ const TIMEZONES = [
     { value: 'Asia/Tokyo', label: 'JST (Tokyo)' }
 ];
 
+const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
+    const hour = Math.floor(i / 2);
+    const minute = i % 2 === 0 ? '00' : '30';
+    return `${hour.toString().padStart(2, '0')}:${minute}`;
+});
+
 export const EmailNotificationSettings = () => {
     const [settings, setSettings] = useState<EmailSettings | null>(null);
     const [loading, setLoading] = useState(true);
@@ -307,7 +313,7 @@ export const EmailNotificationSettings = () => {
             if (!user) return;
 
             const { data, error } = await supabase
-                .from('email_notification_settings')
+                .from('email_notification_settings' as any)
                 .select('*')
                 .eq('user_id', user.id)
                 .single();
@@ -318,9 +324,10 @@ export const EmailNotificationSettings = () => {
             }
 
             if (data) {
+                const typedData = data as unknown as EmailSettings;
                 setSettings({
-                    ...data,
-                    daily_brief_days: data.daily_brief_days || []
+                    ...typedData,
+                    daily_brief_days: typedData.daily_brief_days || []
                 });
             } else {
                 // Create default settings
@@ -343,13 +350,14 @@ export const EmailNotificationSettings = () => {
                 };
 
                 const { data: newSettings, error: insertError } = await supabase
-                    .from('email_notification_settings')
+                    .from('email_notification_settings' as any)
                     .insert({ user_id: user.id, ...defaultSettings })
                     .select()
                     .single();
 
                 if (!insertError && newSettings) {
-                    setSettings({ ...newSettings, daily_brief_days: newSettings.daily_brief_days || [] });
+                    const typedNewSettings = newSettings as unknown as EmailSettings;
+                    setSettings({ ...typedNewSettings, daily_brief_days: typedNewSettings.daily_brief_days || [] });
                 }
             }
         } catch (err) {
@@ -368,7 +376,7 @@ export const EmailNotificationSettings = () => {
             if (!user) return;
 
             const { error } = await supabase
-                .from('email_notification_settings')
+                .from('email_notification_settings' as any)
                 .update(settings)
                 .eq('user_id', user.id);
 
@@ -638,47 +646,57 @@ export const EmailNotificationSettings = () => {
                                         <div className="space-y-2">
                                             <Label>Time</Label>
                                             <div className="flex gap-2">
-                                                <input
-                                                    type="time"
-                                                    value={settings.daily_brief_time.substring(0, 5)}
-                                                    onChange={(e) => setSettings({ ...settings, daily_brief_time: e.target.value + ':00' })}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                                />
-                                                <Select
-                                                    value={settings.daily_brief_timezone}
-                                                    onValueChange={(value) => setSettings({ ...settings, daily_brief_timezone: value })}
-                                                >
-                                                    <SelectTrigger className="w-[180px]">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {TIMEZONES.map(tz => (
-                                                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>Days</Label>
-                                            <div className="flex gap-2 flex-wrap">
-                                                {DAYS.map(day => (
-                                                    <Button
-                                                        key={day.value}
-                                                        variant={settings.daily_brief_days.includes(day.value) ? 'default' : 'outline'}
-                                                        size="sm"
-                                                        onClick={() => toggleDay(day.value)}
-                                                        className="w-14"
+                                                <div className="flex gap-2">
+                                                    <Select
+                                                        value={settings.daily_brief_time.substring(0, 5)}
+                                                        onValueChange={(value) => setSettings({ ...settings, daily_brief_time: value + ':00' })}
                                                     >
-                                                        {day.label}
-                                                    </Button>
-                                                ))}
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select time" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIME_SLOTS.map(time => (
+                                                                <SelectItem key={time} value={time}>
+                                                                    {time}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Select
+                                                        value={settings.daily_brief_timezone}
+                                                        onValueChange={(value) => setSettings({ ...settings, daily_brief_timezone: value })}
+                                                    >
+                                                        <SelectTrigger className="w-[180px]">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIMEZONES.map(tz => (
+                                                                <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
+
+                                            <div className="space-y-2">
+                                                <Label>Days</Label>
+                                                <div className="flex gap-2 flex-wrap">
+                                                    {DAYS.map(day => (
+                                                        <Button
+                                                            key={day.value}
+                                                            variant={settings.daily_brief_days.includes(day.value) ? 'default' : 'outline'}
+                                                            size="sm"
+                                                            onClick={() => toggleDay(day.value)}
+                                                            className="w-14"
+                                                        >
+                                                            {day.label}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
                                 )}
-                            </div>
+                                    </div>
                         </AccordionContent>
                     </AccordionItem>
 
@@ -766,47 +784,57 @@ export const EmailNotificationSettings = () => {
                                         <div className="space-y-2">
                                             <Label>Time</Label>
                                             <div className="flex gap-2">
-                                                <input
-                                                    type="time"
-                                                    value={settings.weekly_reminder_time.substring(0, 5)}
-                                                    onChange={(e) => setSettings({ ...settings, weekly_reminder_time: e.target.value + ':00' })}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                                />
+                                                <div className="flex gap-2">
+                                                    <Select
+                                                        value={settings.weekly_reminder_time.substring(0, 5)}
+                                                        onValueChange={(value) => setSettings({ ...settings, weekly_reminder_time: value + ':00' })}
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select time" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIME_SLOTS.map(time => (
+                                                                <SelectItem key={time} value={time}>
+                                                                    {time}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Select
+                                                        value={settings.weekly_reminder_timezone}
+                                                        onValueChange={(value) => setSettings({ ...settings, weekly_reminder_timezone: value })}
+                                                    >
+                                                        <SelectTrigger className="w-[180px]">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIMEZONES.map(tz => (
+                                                                <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>Frequency</Label>
                                                 <Select
-                                                    value={settings.weekly_reminder_timezone}
-                                                    onValueChange={(value) => setSettings({ ...settings, weekly_reminder_timezone: value })}
+                                                    value={settings.weekly_reminder_frequency}
+                                                    onValueChange={(value) => setSettings({ ...settings, weekly_reminder_frequency: value })}
                                                 >
-                                                    <SelectTrigger className="w-[180px]">
+                                                    <SelectTrigger>
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {TIMEZONES.map(tz => (
-                                                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                                                        ))}
+                                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                                        <SelectItem value="biweekly">Bi-weekly (Every 2 weeks)</SelectItem>
+                                                        <SelectItem value="monthly">Monthly (Every 4 weeks)</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>Frequency</Label>
-                                            <Select
-                                                value={settings.weekly_reminder_frequency}
-                                                onValueChange={(value) => setSettings({ ...settings, weekly_reminder_frequency: value })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="weekly">Weekly</SelectItem>
-                                                    <SelectItem value="biweekly">Bi-weekly (Every 2 weeks)</SelectItem>
-                                                    <SelectItem value="monthly">Monthly (Every 4 weeks)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </>
+                                        </>
                                 )}
-                            </div>
+                                    </div>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
