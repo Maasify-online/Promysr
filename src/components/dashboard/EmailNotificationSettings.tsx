@@ -621,70 +621,6 @@ export const EmailNotificationSettings = () => {
                                     </div>
                                 </div>
 
-                                {/* Leader Radar Toggle */}
-                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
-                                    <Label htmlFor="leader-daily-radar" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium">👑 Enable Leader Daily Radar</span>
-                                            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">Receive team member tasks due today</div>
-                                    </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setPreviewType('leader-daily-radar')}
-                                            className="h-8 w-8"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Switch
-                                            id="leader-daily-radar"
-                                            checked={settings.leader_daily_radar_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, leader_daily_radar_enabled: checked })}
-                                        />
-                                    </div>
-                                </div>
-                                {settings.leader_daily_radar_enabled && (
-                                    <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
-                                        <div className="flex gap-2">
-                                            <div className="w-full">
-                                                <Label className="text-xs text-muted-foreground mb-1 block">Radar Time</Label>
-                                                <Select
-                                                    value={settings.leader_daily_radar_time?.substring(0, 5) || '08:00'}
-                                                    onValueChange={(value) => setSettings({ ...settings, leader_daily_radar_time: value + ':00' })}
-                                                >
-                                                    <SelectTrigger className="h-8">
-                                                        <SelectValue placeholder="Time" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {TIME_SLOTS.map(time => (
-                                                            <SelectItem key={time} value={time}>{time}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="w-[180px]">
-                                                <Label className="text-xs text-muted-foreground mb-1 block">Team Timezone</Label>
-                                                <Select
-                                                    value={settings.leader_report_timezone || 'Asia/Kolkata'}
-                                                    onValueChange={(value) => setSettings({ ...settings, leader_report_timezone: value })}
-                                                >
-                                                    <SelectTrigger className="h-8">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {TIMEZONES.map(tz => (
-                                                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
                                 {settings.daily_brief_enabled && (
                                     <>
                                         <div className="space-y-2">
@@ -743,6 +679,72 @@ export const EmailNotificationSettings = () => {
                                         </div>
                                     </>
                                 )}
+
+                                {/* Leader Radar Toggle */}
+                                <div className="space-y-4 pt-4 mt-4 border-t border-gray-100">
+                                    <div className="flex items-center justify-between gap-2 border-l-2 border-purple-200 pl-4 py-1">
+                                        <Label htmlFor="leader-daily-radar" className="flex-1 cursor-pointer">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium">👑 Enable Leader Daily Radar</span>
+                                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">Receive team member tasks due today</div>
+                                        </Label>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('leader-daily-radar')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                id="leader-daily-radar"
+                                                checked={settings.leader_daily_radar_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, leader_daily_radar_enabled: checked })}
+                                            />
+                                        </div>
+                                    </div>
+                                    {settings.leader_daily_radar_enabled && (
+                                        <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
+                                            <div className="flex gap-2">
+                                                <div className="w-full">
+                                                    <Label className="text-xs text-muted-foreground mb-1 block">Radar Time</Label>
+                                                    <Select
+                                                        value={settings.leader_daily_radar_time?.substring(0, 5) || '08:00'}
+                                                        onValueChange={(value) => setSettings({ ...settings, leader_daily_radar_time: value + ':00' })}
+                                                    >
+                                                        <SelectTrigger className="h-8">
+                                                            <SelectValue placeholder="Time" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIME_SLOTS.map(time => (
+                                                                <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="w-[180px]">
+                                                    <Label className="text-xs text-muted-foreground mb-1 block">Team Timezone</Label>
+                                                    <Select
+                                                        value={settings.leader_report_timezone || 'Asia/Kolkata'}
+                                                        onValueChange={(value) => setSettings({ ...settings, leader_report_timezone: value })}
+                                                    >
+                                                        <SelectTrigger className="h-8">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIMEZONES.map(tz => (
+                                                                <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>
@@ -780,52 +782,6 @@ export const EmailNotificationSettings = () => {
                                         />
                                     </div>
                                 </div>
-
-                                {/* Leader Weekly Report Toggle */}
-                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
-                                    <Label htmlFor="leader-weekly-report" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium">👑 Enable Leader Weekly Team Report</span>
-                                            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">Receive team performance stats weekly</div>
-                                    </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setPreviewType('leader-weekly-report')}
-                                            className="h-8 w-8"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Switch
-                                            id="leader-weekly-report"
-                                            checked={settings.leader_weekly_report_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, leader_weekly_report_enabled: checked })}
-                                        />
-                                    </div>
-                                </div>
-                                {settings.leader_weekly_report_enabled && (
-                                    <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
-                                        <div className="w-full">
-                                            <Label className="text-xs text-muted-foreground mb-1 block">Report Time</Label>
-                                            <Select
-                                                value={settings.leader_weekly_report_time?.substring(0, 5) || '09:00'}
-                                                onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_time: value + ':00' })}
-                                            >
-                                                <SelectTrigger className="h-8 w-[140px]">
-                                                    <SelectValue placeholder="Time" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {TIME_SLOTS.map(time => (
-                                                        <SelectItem key={time} value={time}>{time}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                )}
 
                                 {settings.weekly_reminder_enabled && (
                                     <>
@@ -903,6 +859,54 @@ export const EmailNotificationSettings = () => {
                                         </div>
                                     </>
                                 )}
+
+                                {/* Leader Weekly Report Toggle */}
+                                <div className="space-y-4 pt-4 mt-4 border-t border-gray-100">
+                                    <div className="flex items-center justify-between gap-2 border-l-2 border-purple-200 pl-4 py-1">
+                                        <Label htmlFor="leader-weekly-report" className="flex-1 cursor-pointer">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium">👑 Enable Leader Weekly Team Report</span>
+                                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">Receive team performance stats weekly</div>
+                                        </Label>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('leader-weekly-report')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                id="leader-weekly-report"
+                                                checked={settings.leader_weekly_report_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, leader_weekly_report_enabled: checked })}
+                                            />
+                                        </div>
+                                    </div>
+                                    {settings.leader_weekly_report_enabled && (
+                                        <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
+                                            <div className="w-full">
+                                                <Label className="text-xs text-muted-foreground mb-1 block">Report Time</Label>
+                                                <Select
+                                                    value={settings.leader_weekly_report_time?.substring(0, 5) || '09:00'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_time: value + ':00' })}
+                                                >
+                                                    <SelectTrigger className="h-8 w-[140px]">
+                                                        <SelectValue placeholder="Time" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIME_SLOTS.map(time => (
+                                                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>
