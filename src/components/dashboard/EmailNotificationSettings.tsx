@@ -228,6 +228,67 @@ export const EmailNotificationSettings = () => {
                     </div>
                     <a href="#" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Full Report</a>
                 </div>`
+            },
+            'leader-daily-radar': {
+                title: '👑 Leader Daily Radar',
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="background: linear-gradient(135deg, #00C9B7 0%, #007AFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Sr</span>
+                        </h1>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
+                    </div>
+                    <h2 style="color: #1e293b; margin-top: 0;">👑 Leader Briefing</h2>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>Manager</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">Your team has <strong>3 items</strong> due today or overdue:</p>
+                    <div style="margin: 24px 0;">
+                        <div style="padding: 16px; border-left: 4px solid #ef4444; background: #fef2f2; margin-bottom: 12px; border-radius: 4px;">
+                            <p style="margin: 0; font-weight: 600; color: #991b1b;">Sarah Johnson</p>
+                            <p style="margin: 4px 0; color: #1e293b;">"Complete client proposal"</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Status: Open | Due: Dec 30, 2025</p>
+                        </div>
+                        <div style="padding: 16px; border-left: 4px solid #ef4444; background: #fef2f2; margin-bottom: 12px; border-radius: 4px;">
+                            <p style="margin: 0; font-weight: 600; color: #991b1b;">Mike Chen</p>
+                            <p style="margin: 4px 0; color: #1e293b;">"Update project documentation"</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Status: Missed | Due: Dec 29, 2025</p>
+                        </div>
+                    </div>
+                    <a href="#" style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Team Dashboard</a>
+                </div>`
+            },
+            'leader-weekly-report': {
+                title: '👑 Weekly Team Report',
+                preview: `<div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <h1 style="font-weight: 800; font-size: 24px; color: #0f172a; font-family: sans-serif; margin: 0 0 12px 0;">
+                            Promy<span style="background: linear-gradient(135deg, #00C9B7 0%, #007AFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Sr</span>
+                        </h1>
+                        <div style="height: 4px; width: 100%; background: linear-gradient(90deg, #007AFF 0%, #00C9B7 100%); border-radius: 2px;"></div>
+                    </div>
+                    <h2 style="color: #1e293b; margin-top: 0;">👑 Your Weekly Team Report</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of Dec 23, 2025</p>
+                    
+                    <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e9d5ff;">
+                        <h3 style="margin: 0 0 12px 0; color: #7c3aed;">Team Performance</h3>
+                        <p style="margin: 4px 0; color: #6b21a8;">👥 Team Members: <strong>5</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">📋 Active Promises: <strong>12</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">⏳ Pending Verification: <strong>3</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">⚠️ Overdue: <strong>2</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">❌ Missed: <strong>1</strong></p>
+                        <p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #7c3aed;">📊 Team Avg Integrity: 88%</p>
+                    </div>
+
+                    <h3 style="color: #1e293b; margin-bottom: 12px;">🚩 Red Flags (Overdue/Missed)</h3>
+                    <div style="margin: 16px 0;">
+                        <div style="padding: 12px; background: #fef2f2; border-left: 3px solid #ef4444; margin-bottom: 8px; border-radius: 4px;">
+                            <p style="margin: 0; font-weight: 600; color: #991b1b;">Sarah Johnson</p>
+                            <p style="margin: 4px 0; color: #1e293b; font-size: 14px;">Complete client proposal</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Overdue | Due: Dec 28, 2025</p>
+                        </div>
+                    </div>
+
+                    <a href="#" style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 24px;">View Team Dashboard</a>
+                </div>`
             }
         };
 
@@ -544,6 +605,24 @@ export const EmailNotificationSettings = () => {
                                     </div>
                                 </div>
 
+                                {/* Leader Radar Preview */}
+                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
+                                    <Label className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">👑 Leader Radar (Team View)</span>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">Leaders receive team member tasks</div>
+                                    </Label>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setPreviewType('leader-daily-radar')}
+                                        className="h-8 w-8"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                    </Button>
+                                </div>
+
                                 {settings.daily_brief_enabled && (
                                     <>
                                         <div className="space-y-2">
@@ -625,6 +704,24 @@ export const EmailNotificationSettings = () => {
                                             onCheckedChange={(checked) => setSettings({ ...settings, weekly_reminder_enabled: checked })}
                                         />
                                     </div>
+                                </div>
+
+                                {/* Leader Weekly Report Preview */}
+                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
+                                    <Label className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">👑 Leader Weekly Team Report</span>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">Leaders receive team performance stats</div>
+                                    </Label>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setPreviewType('leader-weekly-report')}
+                                        className="h-8 w-8"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                    </Button>
                                 </div>
 
                                 {settings.weekly_reminder_enabled && (
