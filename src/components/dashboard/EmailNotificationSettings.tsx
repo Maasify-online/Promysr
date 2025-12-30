@@ -742,6 +742,7 @@ export const EmailNotificationSettings = () => {
                                                     </Select>
                                                 </div>
                                             </div>
+                                            <p className="text-[10px] text-muted-foreground mt-2">* Leader Radar is sent Monday to Friday.</p>
                                         </div>
                                     )}
                                 </div>
@@ -904,6 +905,7 @@ export const EmailNotificationSettings = () => {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+                                            <p className="text-[10px] text-muted-foreground mt-2">* Leader Weekly Report is always sent on Monday.</p>
                                         </div>
                                     )}
                                 </div>
