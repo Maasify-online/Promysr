@@ -136,7 +136,7 @@ serve(async (req) => {
             // --- LEADER RADAR LOGIC ---
             if (settings.leader_daily_radar_enabled) {
                 const [leaderHour, leaderMinute] = (settings.leader_daily_radar_time || '09:00:00').split(':').map(Number)
-                const leaderDays = ["monday", "tuesday", "wednesday", "thursday", "friday"] // Default weekdays for now
+                const leaderDays = settings.leader_daily_radar_days || ["monday", "tuesday", "wednesday", "thursday", "friday"]
                 const leaderTimezone = settings.leader_report_timezone || settings.daily_brief_timezone || 'Asia/Kolkata'
 
                 // Re-calculate UTC target for Leader time
@@ -260,7 +260,9 @@ serve(async (req) => {
             // --- LEADER WEEKLY REPORT LOGIC ---
             if (settings.leader_weekly_report_enabled) {
                 const [reportHour, reportMinute] = (settings.leader_weekly_report_time || '09:00:00').split(':').map(Number)
-                const reportDay = 'monday' // Default to Monday for Team Reports
+                const reportDay = settings.leader_weekly_report_day || 'monday'
+                const frequency = settings.leader_weekly_report_frequency || 'weekly'
+                const lastSent = settings.leader_weekly_report_last_sent ? new Date(settings.leader_weekly_report_last_sent) : null
                 const leaderTimezone = settings.leader_report_timezone || settings.daily_brief_timezone || 'Asia/Kolkata'
 
                 // Re-calculate UTC target
@@ -284,13 +286,28 @@ serve(async (req) => {
                 const isRightTime = (timeDiff < 0.1) || (wrapDiff < 0.1)
                 const isRightDay = userDayOfWeek === reportDay
 
-                if (isRightTime && isRightDay) {
+
+
+                let shouldSend = isRightTime && isRightDay
+
+                if (shouldSend && frequency === 'biweekly' && lastSent) {
+                    const daysSinceLastSend = (now.getTime() - lastSent.getTime()) / (1000 * 60 * 60 * 24)
+                    shouldSend = daysSinceLastSend >= 13
+                }
+
+                if (shouldSend) {
                     console.log(`Sending Leader Weekly Report to ${userEmail} (scheduled for ${reportDay} ${reportHour}:00 ${leaderTimezone})`)
 
                     // Call send-weekly-reminder for this leader (SCOPE: LEADER)
                     await supabase.functions.invoke('send-weekly-reminder', {
                         body: { userEmail, scope: 'leader' }
                     })
+
+                    // Update leader last_sent timestamp
+                    await supabase
+                        .from('email_notification_settings')
+                        .update({ leader_weekly_report_last_sent: now.toISOString() })
+                        .eq('user_id', userId)
 
                     weeklyReminderCount++
                 }

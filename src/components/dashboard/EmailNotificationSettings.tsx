@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Bell, Clock, Calendar, Save, Eye } from 'lucide-react';
+import { Bell, Clock, Calendar, Save, Eye, Users, User } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface EmailSettings {
     promise_created_enabled: boolean;
@@ -30,7 +31,10 @@ interface EmailSettings {
     weekly_reminder_timezone: string;
     weekly_reminder_frequency: string;
     leader_daily_radar_time: string;
+    leader_daily_radar_days: string[];
     leader_weekly_report_time: string;
+    leader_weekly_report_day: string;
+    leader_weekly_report_frequency: string;
     leader_report_timezone: string;
 }
 
@@ -417,192 +421,283 @@ export const EmailNotificationSettings = () => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="text-xl flex items-center gap-2">
                     <Bell className="w-5 h-5" />
                     Notification Preferences
                 </CardTitle>
                 <CardDescription>
-                    Customize which email notifications you receive and when
+                    Manage how you receive updates about your team and your own tasks.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <Accordion type="multiple" className="w-full">
-                    {/* Event-Based Notifications */}
-                    <AccordionItem value="event-based">
-                        <AccordionTrigger className="text-base font-semibold">
-                            Event-Based Notifications
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="promise-created" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Promise Created</span>
-                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">When a new promise is assigned to you</div>
+                <Tabs defaultValue="leader" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                        <TabsTrigger value="leader" className="flex items-center gap-2">
+                            <span>👑 Team Leader</span>
+                            <Badge variant="secondary" className="bg-purple-100 text-purple-700 ml-2">Team Updates</Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="task-owner" className="flex items-center gap-2">
+                            <span>👤 Task Owner</span>
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 ml-2">My Tasks</Badge>
+                        </TabsTrigger>
+                    </TabsList>
+
+                    {/* --- LEADER TAB --- */}
+                    <TabsContent value="leader" className="space-y-6">
+                        <div className="bg-purple-50/50 p-4 rounded-lg border border-purple-100 mb-4">
+                            <h3 className="font-semibold text-purple-900 flex items-center gap-2 mb-2">
+                                <Users className="w-4 h-4" />
+                                Team Oversight
+                            </h3>
+                            <p className="text-sm text-purple-700">
+                                Configure when you receive updates about your team's performance and slipped promises.
+                            </p>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* Leader Daily Radar */}
+                            <div className="space-y-4 border rounded-lg p-4 bg-white">
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex flex-col gap-1">
+                                        <span className="font-medium flex items-center gap-2">
+                                            Daily Team Radar
+                                            <Badge variant="outline" className="text-xs font-normal">08:00 AM Default</Badge>
+                                        </span>
+                                        <span className="text-sm text-muted-foreground">Summary of team tasks due today</span>
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => setPreviewType('promise-created')}
+                                            onClick={() => setPreviewType('leader-daily-radar')}
                                             className="h-8 w-8"
                                         >
                                             <Eye className="h-4 w-4" />
                                         </Button>
                                         <Switch
-                                            id="promise-created"
-                                            checked={settings.promise_created_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_created_enabled: checked })}
+                                            checked={settings.leader_daily_radar_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, leader_daily_radar_enabled: checked })}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="review-needed" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Review Needed</span>
-                                            <Badge variant="default" className="text-xs bg-blue-600">Leader</Badge>
+                                {settings.leader_daily_radar_enabled && (
+                                    <div className="pl-4 border-l-2 border-purple-200 space-y-4 pt-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Time</Label>
+                                                <Select
+                                                    value={settings.leader_daily_radar_time?.substring(0, 5) || '08:00'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_daily_radar_time: value + ':00' })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select time" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIME_SLOTS.map(time => (
+                                                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Timezone</Label>
+                                                <Select
+                                                    value={settings.leader_report_timezone || 'Asia/Kolkata'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_report_timezone: value })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIMEZONES.map(tz => (
+                                                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-muted-foreground">When a team member marks a promise as complete</div>
+
+                                        <div className="space-y-2">
+                                            <Label>Days</Label>
+                                            <div className="flex gap-2 flex-wrap">
+                                                {DAYS.map(day => (
+                                                    <Button
+                                                        key={day.value}
+                                                        variant={(settings.leader_daily_radar_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']).includes(day.value) ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const current = settings.leader_daily_radar_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+                                                            const updated = current.includes(day.value)
+                                                                ? current.filter(d => d !== day.value)
+                                                                : [...current, day.value];
+                                                            setSettings({ ...settings, leader_daily_radar_days: updated });
+                                                        }}
+                                                        className={`w-14 ${!(settings.leader_daily_radar_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']).includes(day.value) ? 'text-muted-foreground' : ''}`}
+                                                    >
+                                                        {day.label}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Leader Weekly Report */}
+                            <div className="space-y-4 border rounded-lg p-4 bg-white">
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex flex-col gap-1">
+                                        <span className="font-medium flex items-center gap-2">
+                                            Weekly Team Report
+                                            <Badge variant="outline" className="text-xs font-normal">Mondays</Badge>
+                                        </span>
+                                        <span className="text-sm text-muted-foreground">Comprehensive team performance analysis</span>
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => setPreviewType('review-needed')}
+                                            onClick={() => setPreviewType('leader-weekly-report')}
                                             className="h-8 w-8"
                                         >
                                             <Eye className="h-4 w-4" />
                                         </Button>
                                         <Switch
-                                            id="review-needed"
-                                            checked={settings.review_needed_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, review_needed_enabled: checked })}
+                                            checked={settings.leader_weekly_report_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, leader_weekly_report_enabled: checked })}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="promise-closed" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Promise Closed</span>
-                                            <Badge variant="default" className="text-xs bg-blue-600">Leader</Badge>
+                                {settings.leader_weekly_report_enabled && (
+                                    <div className="pl-4 border-l-2 border-purple-200 space-y-4 pt-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Send On</Label>
+                                                <Select
+                                                    value={settings.leader_weekly_report_day || 'monday'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_day: value })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {DAYS.map(day => (
+                                                            <SelectItem key={day.value} value={day.value}>{day.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Time</Label>
+                                                <Select
+                                                    value={settings.leader_weekly_report_time?.substring(0, 5) || '09:00'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_time: value + ':00' })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select time" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIME_SLOTS.map(time => (
+                                                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-muted-foreground">When a promise is verified and closed</div>
-                                    </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setPreviewType('promise-closed')}
-                                            className="h-8 w-8"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Switch
-                                            id="promise-closed"
-                                            checked={settings.promise_closed_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_closed_enabled: checked })}
-                                        />
                                     </div>
-                                </div>
+                                )}
+                            </div>
 
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="promise-verified" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Promise Verified</span>
-                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
+                            {/* Leader Event Notifications */}
+                            <div className="space-y-4 border rounded-lg p-4 bg-white">
+                                <Label className="font-semibold mb-4 block">Event Notifications</Label>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label>Ready for Review</Label>
+                                            <p className="text-xs text-muted-foreground">When a team member marks a promise as done</p>
                                         </div>
-                                        <div className="text-sm text-muted-foreground">When your completed promise is verified</div>
-                                    </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setPreviewType('promise-verified')}
-                                            className="h-8 w-8"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Switch
-                                            id="promise-verified"
-                                            checked={settings.promise_verified_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_verified_enabled: checked })}
-                                        />
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('review-needed')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                checked={settings.review_needed_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, review_needed_enabled: checked })}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="completion-rejected" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Completion Rejected</span>
-                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label>Promise Missed</Label>
+                                            <p className="text-xs text-muted-foreground">When a deadline passes without completion</p>
                                         </div>
-                                        <div className="text-sm text-muted-foreground">When your completion is rejected with feedback</div>
-                                    </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setPreviewType('completion-rejected')}
-                                            className="h-8 w-8"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Switch
-                                            id="completion-rejected"
-                                            checked={settings.completion_rejected_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, completion_rejected_enabled: checked })}
-                                        />
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('promise-missed')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                checked={settings.promise_missed_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, promise_missed_enabled: checked })}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="promise-missed" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Promise Missed</span>
-                                            <Badge variant="default" className="text-xs bg-blue-600">Leader</Badge>
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label>Promise Created</Label>
+                                            <p className="text-xs text-muted-foreground">When you assign or receive a new promise</p>
                                         </div>
-                                        <div className="text-sm text-muted-foreground">When a promise deadline is missed</div>
-                                    </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setPreviewType('promise-missed')}
-                                            className="h-8 w-8"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Switch
-                                            id="promise-missed"
-                                            checked={settings.promise_missed_enabled}
-                                            onCheckedChange={(checked) => setSettings({ ...settings, promise_missed_enabled: checked })}
-                                        />
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('promise-created')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                checked={settings.promise_created_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, promise_created_enabled: checked })}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
+                        </div>
+                    </TabsContent>
 
-                    {/* Daily Brief */}
-                    <AccordionItem value="daily-brief">
-                        <AccordionTrigger className="text-base font-semibold">
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                Daily Brief
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="daily-brief" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Enable Daily Brief</span>
-                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
-                                        </div>
+                    {/* --- TASK OWNER TAB --- */}
+                    <TabsContent value="task-owner" className="space-y-6">
+                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 mb-4">
+                            <h3 className="font-semibold text-blue-900 flex items-center gap-2 mb-2">
+                                <User className="w-4 h-4" />
+                                My Commitments
+                            </h3>
+                            <p className="text-sm text-blue-700">
+                                Manage notifications for promises you need to deliver.
+                            </p>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* User Daily Brief */}
+                            <div className="space-y-4 border rounded-lg p-4 bg-white">
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex flex-col gap-1">
+                                        <span className="font-medium">My Daily Brief</span>
+                                        <span className="text-sm text-muted-foreground">Your tasks due today</span>
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <Button
@@ -614,7 +709,6 @@ export const EmailNotificationSettings = () => {
                                             <Eye className="h-4 w-4" />
                                         </Button>
                                         <Switch
-                                            id="daily-brief"
                                             checked={settings.daily_brief_enabled}
                                             onCheckedChange={(checked) => setSettings({ ...settings, daily_brief_enabled: checked })}
                                         />
@@ -622,45 +716,41 @@ export const EmailNotificationSettings = () => {
                                 </div>
 
                                 {settings.daily_brief_enabled && (
-                                    <>
-                                        <div className="space-y-2">
-                                            <Label>Time</Label>
-                                            <div className="flex gap-2">
-                                                <div className="flex gap-2">
-                                                    <Select
-                                                        value={settings.daily_brief_time.substring(0, 5)}
-                                                        onValueChange={(value) => setSettings({ ...settings, daily_brief_time: value + ':00' })}
-                                                    >
-                                                        <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Select time" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {TIME_SLOTS.map(time => (
-                                                                <SelectItem key={time} value={time}>
-                                                                    {time}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <Select
-                                                        value={settings.daily_brief_timezone}
-                                                        onValueChange={(value) => setSettings({ ...settings, daily_brief_timezone: value })}
-                                                    >
-                                                        <SelectTrigger className="w-[180px]">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {TIMEZONES.map(tz => (
-                                                                <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
+                                    <div className="pl-4 border-l-2 border-blue-200 space-y-4 pt-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Time</Label>
+                                                <Select
+                                                    value={settings.daily_brief_time.substring(0, 5)}
+                                                    onValueChange={(value) => setSettings({ ...settings, daily_brief_time: value + ':00' })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select time" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIME_SLOTS.map(time => (
+                                                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
-
+                                            <div className="space-y-2">
+                                                <Label>Timezone</Label>
+                                                <Select
+                                                    value={settings.daily_brief_timezone}
+                                                    onValueChange={(value) => setSettings({ ...settings, daily_brief_timezone: value })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIMEZONES.map(tz => (
+                                                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
-
-
                                         <div className="space-y-2">
                                             <Label>Days</Label>
                                             <div className="flex gap-2 flex-wrap">
@@ -677,95 +767,16 @@ export const EmailNotificationSettings = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                    </>
-                                )}
-
-                                {/* Leader Radar Toggle */}
-                                <div className="space-y-4 pt-4 mt-4 border-t border-gray-100">
-                                    <div className="flex items-center justify-between gap-2 border-l-2 border-purple-200 pl-4 py-1">
-                                        <Label htmlFor="leader-daily-radar" className="flex-1 cursor-pointer">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium">👑 Enable Leader Daily Radar</span>
-                                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">Receive team member tasks due today</div>
-                                        </Label>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setPreviewType('leader-daily-radar')}
-                                                className="h-8 w-8"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                            <Switch
-                                                id="leader-daily-radar"
-                                                checked={settings.leader_daily_radar_enabled}
-                                                onCheckedChange={(checked) => setSettings({ ...settings, leader_daily_radar_enabled: checked })}
-                                            />
-                                        </div>
                                     </div>
-                                    {settings.leader_daily_radar_enabled && (
-                                        <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
-                                            <div className="flex gap-2">
-                                                <div className="w-full">
-                                                    <Label className="text-xs text-muted-foreground mb-1 block">Radar Time</Label>
-                                                    <Select
-                                                        value={settings.leader_daily_radar_time?.substring(0, 5) || '08:00'}
-                                                        onValueChange={(value) => setSettings({ ...settings, leader_daily_radar_time: value + ':00' })}
-                                                    >
-                                                        <SelectTrigger className="h-8">
-                                                            <SelectValue placeholder="Time" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {TIME_SLOTS.map(time => (
-                                                                <SelectItem key={time} value={time}>{time}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="w-[180px]">
-                                                    <Label className="text-xs text-muted-foreground mb-1 block">Team Timezone</Label>
-                                                    <Select
-                                                        value={settings.leader_report_timezone || 'Asia/Kolkata'}
-                                                        onValueChange={(value) => setSettings({ ...settings, leader_report_timezone: value })}
-                                                    >
-                                                        <SelectTrigger className="h-8">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {TIMEZONES.map(tz => (
-                                                                <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
-                                            <p className="text-[10px] text-muted-foreground mt-2">* Leader Radar is sent Monday to Friday.</p>
-                                        </div>
-                                    )}
-                                </div>
+                                )}
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
 
-                    {/* Weekly Reminder */}
-                    <AccordionItem value="weekly-reminder">
-                        <AccordionTrigger className="text-base font-semibold">
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
-                                Weekly Reminder
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between gap-2">
-                                    <Label htmlFor="weekly-reminder" className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Enable Weekly Reminder</span>
-                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
-                                        </div>
+                            {/* User Weekly Reminder */}
+                            <div className="space-y-4 border rounded-lg p-4 bg-white">
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex flex-col gap-1">
+                                        <span className="font-medium">My Weekly Summary</span>
+                                        <span className="text-sm text-muted-foreground">Overview of your upcoming week</span>
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <Button
@@ -777,7 +788,6 @@ export const EmailNotificationSettings = () => {
                                             <Eye className="h-4 w-4" />
                                         </Button>
                                         <Switch
-                                            id="weekly-reminder"
                                             checked={settings.weekly_reminder_enabled}
                                             onCheckedChange={(checked) => setSettings({ ...settings, weekly_reminder_enabled: checked })}
                                         />
@@ -785,118 +795,32 @@ export const EmailNotificationSettings = () => {
                                 </div>
 
                                 {settings.weekly_reminder_enabled && (
-                                    <>
-                                        <div className="space-y-2">
-                                            <Label>Day of Week</Label>
-                                            <Select
-                                                value={settings.weekly_reminder_day}
-                                                onValueChange={(value) => setSettings({ ...settings, weekly_reminder_day: value })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {DAYS.map(day => (
-                                                        <SelectItem key={day.value} value={day.value}>
-                                                            {day.value.charAt(0).toUpperCase() + day.value.slice(1)}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>Time</Label>
-                                            <div className="flex gap-2">
-                                                <div className="flex gap-2">
-                                                    <Select
-                                                        value={settings.weekly_reminder_time.substring(0, 5)}
-                                                        onValueChange={(value) => setSettings({ ...settings, weekly_reminder_time: value + ':00' })}
-                                                    >
-                                                        <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Select time" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {TIME_SLOTS.map(time => (
-                                                                <SelectItem key={time} value={time}>
-                                                                    {time}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <Select
-                                                        value={settings.weekly_reminder_timezone}
-                                                        onValueChange={(value) => setSettings({ ...settings, weekly_reminder_timezone: value })}
-                                                    >
-                                                        <SelectTrigger className="w-[180px]">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {TIMEZONES.map(tz => (
-                                                                <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                        <div className="space-y-2">
-                                            <Label>Frequency</Label>
-                                            <Select
-                                                value={settings.weekly_reminder_frequency}
-                                                onValueChange={(value) => setSettings({ ...settings, weekly_reminder_frequency: value })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="weekly">Weekly</SelectItem>
-                                                    <SelectItem value="biweekly">Bi-weekly (Every 2 weeks)</SelectItem>
-                                                    <SelectItem value="monthly">Monthly (Every 4 weeks)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </>
-                                )}
-
-                                {/* Leader Weekly Report Toggle */}
-                                <div className="space-y-4 pt-4 mt-4 border-t border-gray-100">
-                                    <div className="flex items-center justify-between gap-2 border-l-2 border-purple-200 pl-4 py-1">
-                                        <Label htmlFor="leader-weekly-report" className="flex-1 cursor-pointer">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium">👑 Enable Leader Weekly Team Report</span>
-                                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">Receive team performance stats weekly</div>
-                                        </Label>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setPreviewType('leader-weekly-report')}
-                                                className="h-8 w-8"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                            <Switch
-                                                id="leader-weekly-report"
-                                                checked={settings.leader_weekly_report_enabled}
-                                                onCheckedChange={(checked) => setSettings({ ...settings, leader_weekly_report_enabled: checked })}
-                                            />
-                                        </div>
-                                    </div>
-                                    {settings.leader_weekly_report_enabled && (
-                                        <div className="pl-4 ml-6 border-l-2 border-purple-100 space-y-2">
-                                            <div className="w-full">
-                                                <Label className="text-xs text-muted-foreground mb-1 block">Report Time</Label>
+                                    <div className="pl-4 border-l-2 border-blue-200 space-y-4 pt-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Send On</Label>
                                                 <Select
-                                                    value={settings.leader_weekly_report_time?.substring(0, 5) || '09:00'}
-                                                    onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_time: value + ':00' })}
+                                                    value={settings.weekly_reminder_day}
+                                                    onValueChange={(value) => setSettings({ ...settings, weekly_reminder_day: value })}
                                                 >
-                                                    <SelectTrigger className="h-8 w-[140px]">
-                                                        <SelectValue placeholder="Time" />
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {DAYS.map(day => (
+                                                            <SelectItem key={day.value} value={day.value}>{day.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Time</Label>
+                                                <Select
+                                                    value={settings.weekly_reminder_time.substring(0, 5)}
+                                                    onValueChange={(value) => setSettings({ ...settings, weekly_reminder_time: value + ':00' })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select time" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {TIME_SLOTS.map(time => (
@@ -905,20 +829,66 @@ export const EmailNotificationSettings = () => {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <p className="text-[10px] text-muted-foreground mt-2">* Leader Weekly Report is always sent on Monday.</p>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* User Event Notifications */}
+                            <div className="space-y-4 border rounded-lg p-4 bg-white">
+                                <Label className="font-semibold mb-4 block">Event Notifications</Label>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label>Promise Verified</Label>
+                                            <p className="text-xs text-muted-foreground">When your leader marks your task as correct</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('promise-verified')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                checked={settings.promise_verified_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, promise_verified_enabled: checked })}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label>Completion Rejected</Label>
+                                            <p className="text-xs text-muted-foreground">When your work needs revision</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewType('completion-rejected')}
+                                                className="h-8 w-8"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Switch
+                                                checked={settings.completion_rejected_enabled}
+                                                onCheckedChange={(checked) => setSettings({ ...settings, completion_rejected_enabled: checked })}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
+                        </div>
+                    </TabsContent>
+                </Tabs>
 
                 {/* Save Button */}
-                <div className="flex justify-end mt-6">
-                    <Button onClick={handleSave} disabled={saving} size="lg">
+                <div className="flex justify-end mt-6 pt-4 border-t">
+                    <Button onClick={handleSave} disabled={saving} size="lg" className="w-full sm:w-auto">
                         <Save className="w-4 h-4 mr-2" />
-                        {saving ? 'Saving...' : 'Save Settings'}
+                        {saving ? 'Saving...' : 'Save All Preferences'}
                     </Button>
                 </div>
             </CardContent>
@@ -938,6 +908,6 @@ export const EmailNotificationSettings = () => {
                     />
                 </DialogContent>
             </Dialog>
-        </Card >
+        </Card>
     );
 };
