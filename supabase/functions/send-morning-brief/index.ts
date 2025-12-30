@@ -126,22 +126,39 @@ serve(async (req) => {
             if (!res.ok) console.error(`Resend Error (Doer): ${res.status} ${await res.text()}`);
         }
 
-        // B. Send Leader Radars (Plain text for now, can be templated later)
+        // B. Send Leader Radars (Now using HTML template)
         for (const [email, tasks] of leaderMap.entries()) {
             if (!checkPref(email, 'daily_brief_enabled')) {
                 console.log(`Skipping Leader Radar for ${email} (Preference Off)`);
                 continue;
             }
 
-            const teamList = tasks.map((t: any) => `- ${t.owner_name}: ${t.promise_text} (${t.status})`).join('\n');
+            // Get leader name from profile
+            const leaderProfile = Array.from(profileMap.values()).find(p => p.email === email);
+
+            // Format tasks for template
+            const formattedTeamTasks = tasks.map((t: any) => ({
+                owner_name: t.owner_name,
+                promise_text: t.promise_text,
+                status: t.status,
+                due_date: t.due_date
+            }));
+
+            // Use shared email template
+            const { subject, html } = getEmailTemplate('leader_daily_radar', {
+                leader_name: leaderProfile?.full_name || 'Leader',
+                team_risk_count: tasks.length,
+                team_tasks: formattedTeamTasks
+            });
+
             const res = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
                 body: JSON.stringify({
                     from: 'PromySr <noreply@mail.promysr.com>',
                     to: [email],
-                    subject: `👑 Leader Radar: ${tasks.length} Team Risks`,
-                    text: `Leader Briefing,\n\nYour team has ${tasks.length} items due today or overdue:\n\n${teamList}\n\nCheck the Leader Command Center: ${APP_URL}/dashboard`
+                    subject: subject,
+                    html: html
                 })
             });
             if (!res.ok) console.error(`Resend Error (Leader): ${res.status} ${await res.text()}`);

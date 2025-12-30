@@ -212,6 +212,66 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
             `;
             break;
 
+        case 'leader_daily_radar':
+            subject = `👑 Leader Radar: ${data.team_risk_count || 0} Team Risks`;
+            const leaderTaskList = (data.team_tasks || []).map((t: any) => `
+                <div style="padding: 16px; border-left: 4px solid #ef4444; background: #fef2f2; margin-bottom: 12px; border-radius: 4px;">
+                    <p style="margin: 0; font-weight: 600; color: #991b1b;">${t.owner_name}</p>
+                    <p style="margin: 4px 0; color: #1e293b;">"${t.promise_text}"</p>
+                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">Status: ${t.status} | Due: ${t.due_date}</p>
+                </div>
+            `).join('');
+
+            html = `
+                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    ${header}
+                    <h2 style="color: #1e293b; margin-top: 0;">👑 Leader Briefing</h2>
+                    <p style="color: #334155; font-size: 16px;">Hi <strong>${data.leader_name || 'Leader'}</strong>,</p>
+                    <p style="color: #334155; font-size: 16px;">Your team has <strong>${data.team_risk_count || 0} items</strong> due today or overdue:</p>
+                    <div style="margin: 24px 0;">
+                        ${leaderTaskList || '<p style="color: #64748b;">No team risks today!</p>'}
+                    </div>
+                    <a href="${appUrl}/dashboard" style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px;">View Team Dashboard</a>
+                </div>
+            `;
+            break;
+
+        case 'weekly_leader_report':
+            subject = `👑 Weekly Team Report: ${data.team_member_count || 0} Members`;
+            const redFlagsList = (data.red_flags || []).map((flag: any) => `
+                <div style="padding: 12px; background: #fef2f2; border-left: 3px solid #ef4444; margin-bottom: 8px; border-radius: 4px;">
+                    <p style="margin: 0; font-weight: 600; color: #991b1b;">${flag.owner_name}</p>
+                    <p style="margin: 4px 0; color: #1e293b; font-size: 14px;">${flag.promise_text}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">${flag.status} | Due: ${formatToIST(flag.due_date)}</p>
+                </div>
+            `).join('') || '<p style="color: #16a34a; font-weight: 600;">✓ No red flags this week!</p>';
+
+            html = `
+                <div style="font-family: 'Inter', sans-serif; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 600px; margin: 0 auto; background-color: white;">
+                    ${header}
+                    <h2 style="color: #1e293b; margin-top: 0;">👑 Your Weekly Team Report</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Week of ${data.week_start ? formatToIST(data.week_start).split(',')[0] : 'This Week'}</p>
+                    
+                    <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e9d5ff;">
+                        <h3 style="margin: 0 0 12px 0; color: #7c3aed;">Team Performance</h3>
+                        <p style="margin: 4px 0; color: #6b21a8;">👥 Team Members: <strong>${data.team_member_count || 0}</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">📋 Active Promises: <strong>${data.total_active || 0}</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">⏳ Pending Verification: <strong>${data.pending_verification || 0}</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">⚠️ Overdue: <strong>${data.overdue_count || 0}</strong></p>
+                        <p style="margin: 4px 0; color: #6b21a8;">❌ Missed: <strong>${data.missed_count || 0}</strong></p>
+                        ${data.team_avg_score ? `<p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #7c3aed;">📊 Team Avg Integrity: ${data.team_avg_score}%</p>` : ''}
+                    </div>
+
+                    <h3 style="color: #1e293b; margin-bottom: 12px;">🚩 Red Flags (Overdue/Missed)</h3>
+                    <div style="margin: 16px 0;">
+                        ${redFlagsList}
+                    </div>
+
+                    <a href="${appUrl}/dashboard" style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 14px; margin-top: 24px;">View Team Dashboard</a>
+                </div>
+            `;
+            break;
+
         default:
             subject = "Notification from PromySr";
             html = `<div>You have a new notification.</div>`;
