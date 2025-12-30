@@ -19,7 +19,7 @@ import { useState } from "react";
 // EXTRACTED CONTENT COMPONENT
 function SidebarContent({ activeTab, onTabChange, onSignOut, className, subscriptionPlan = 'starter_999', userRole = 'member', onItemClick }: SidebarProps & { onItemClick?: () => void }) {
     // PLAN HELPERS
-    const isBasic = (subscriptionPlan === 'starter_999' || subscriptionPlan === 'basic_999');
+    const isBasic = false; // Unlocked for user request
 
     // Basic Menu
     const menu = [

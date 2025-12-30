@@ -54,12 +54,12 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
     // Trial = 10
     const PROMISE_LIMIT = isTrial ? 10 : 100;
 
-    const isLimitReached = (isBasic || isTrial) && promiseCount >= PROMISE_LIMIT;
+    const isLimitReached = false; // Unlocked
 
     // LOCK LOGIC: Members on Basic OR Limit Reached
     // Trial users are NOT locked by role, only by limit
     // Fallback to externalLocked if provided (Source of Truth from Dashboard)
-    const internalLocked = (userRole === 'member' && isBasic) || isLimitReached;
+    const internalLocked = false; // Unlocked
     const isLocked = externalLocked !== undefined ? externalLocked : internalLocked;
 
     const handleSubmit = async (e: React.FormEvent) => {

@@ -83,7 +83,7 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
                 handler: async function (response: any) {
                     toast.success("Payment Successful!");
                     // Optimistic Update
-                    await updateOrgSetting({ subscription_plan: planId });
+                    await updateOrgSetting({ subscription_plan: planId as Organization['subscription_plan'] });
                     setTimeout(() => window.location.reload(), 1000);
                 },
                 prefill: {
@@ -280,7 +280,7 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
 
         const { error } = await supabase
             .from('organizations')
-            .update({ subscription_plan: newPlan })
+            .update({ subscription_plan: newPlan as any }) // Cast for dev flexibility
             .eq('id', organization.id);
 
         if (error) {
@@ -303,9 +303,9 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
         const currentCount = await supabase.from('promises').select('*', { count: 'exact', head: true });
         const count = currentCount.count || 0;
 
-        const isTrial = organization.subscription_plan === 'trial';
+        const isTrial = organization.status === 'trialing'; // Fixed comparison
         const isBasic = organization.subscription_plan === 'starter_999' || organization.subscription_plan === 'basic_999';
-        const limit = isTrial ? 10 : (isBasic ? 100 : Infinity);
+        const limit = Infinity; // Unlocked
 
         if (count + 5 > limit) {
             toast.error(`Cannot seed: Would exceed ${organization.subscription_plan} limit (${limit})`);
@@ -591,14 +591,14 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
             <div className="grid gap-6 md:grid-cols-2">
 
                 {/* EMAIL CONFIGURATION (Restricted) */}
-                <Card className={`h-full flex flex-col ${!['pro_1999', 'ultimate_3999'].includes(organization.subscription_plan) ? "opacity-75 border-dashed" : ""}`}>
+                <Card className={`h-full flex flex-col`}>
                     <CardHeader>
                         <div className="flex justify-between items-start">
                             <div>
                                 <CardTitle>Email Brand</CardTitle>
                                 <CardDescription>Customize sender identity.</CardDescription>
                             </div>
-                            {!['pro_1999', 'ultimate_3999'].includes(organization.subscription_plan) && (
+                            {false && ( // Unlocked: Hide PRO badge
                                 <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50">
                                     <Lock className="w-3 h-3 mr-1" /> PRO
                                 </Badge>
@@ -612,7 +612,7 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
                                 value={senderName}
                                 onChange={(e) => setSenderName(e.target.value)}
                                 placeholder="e.g. Acme Team"
-                                disabled={!['pro_1999', 'ultimate_3999'].includes(organization.subscription_plan)}
+                                disabled={false} // Unlocked
                             />
                             {!['pro_1999', 'ultimate_3999'].includes(organization.subscription_plan) ? (
                                 <p className="text-xs text-muted-foreground">
@@ -630,13 +630,13 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
                                 value={replyToEmail}
                                 onChange={(e) => setReplyToEmail(e.target.value)}
                                 placeholder="e.g. admin@acme.com"
-                                disabled={!['pro_1999', 'ultimate_3999'].includes(organization.subscription_plan)}
+                                disabled={false} // Unlocked
                             />
                         </div>
                         <div className="flex justify-end pt-2">
                             <Button
                                 onClick={handleSaveEmailSettings}
-                                disabled={!['pro_1999', 'ultimate_3999'].includes(organization.subscription_plan)}
+                                disabled={false} // Unlocked
                                 size="sm"
                             >
                                 <Save className="w-4 h-4 mr-2" /> Save

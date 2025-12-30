@@ -62,6 +62,20 @@ const Dashboard = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [lockedAction, setLockedAction] = useState<string | null>(null);
+
+  // LAZY GATE CHECKER
+  const checkGate = (action: string) => {
+    // If Organization is inactive (Gate Closed)
+    // AND action is a WRITE operation
+    // THEN Trigger Paywall
+    if (organization?.status === 'inactive') {
+      setLockedAction(action);
+      setShowPaywall(true);
+      return false;
+    }
+    return true;
+  };
 
   // Dashboard State
   const [targetUserEmail, setTargetUserEmail] = useState<string | null>(null);
@@ -367,10 +381,10 @@ const Dashboard = () => {
         }
 
         // CHECK TRIAL STATUS
-        // No expiration block anymore. We assume card handles 7-day charge.
-        // We only block if 'inactive' (Card Gate).
-        const isInactive = organization?.status === 'inactive';
-        setShowPaywall(isInactive); // Reuse showPaywall state for the Gate logic
+        // Lazy Gate: We do NOT show paywall on load anymore.
+        // It is triggered by user action via checkGate()
+        // const isInactive = organization?.status === 'inactive';
+        setShowPaywall(false); // Default to closed on load
 
         const { data: promisesData } = await supabase
           .from("promises").select("*")
@@ -458,6 +472,7 @@ const Dashboard = () => {
   };
 
   const handleClose = async (id: string, currentStatus: string) => {
+    if (!checkGate('verify')) return;
     // Fetch full promise data first (needed for email notifications)
     const { data: promiseData } = await supabase
       .from("promises")
@@ -585,6 +600,7 @@ const Dashboard = () => {
   };
 
   const handleCreatePromise = async (data: any) => {
+    if (!checkGate('create')) return;
     // 1. Optimistic Create
     const tempId = Math.random().toString(36).substr(2, 9);
 
@@ -669,6 +685,7 @@ const Dashboard = () => {
   };
 
   const handleReject = async () => {
+    if (!checkGate('reject')) return;
     if (!rejectPromiseId || !rejectionReason.trim()) {
       toast.error("Please provide a reason for rejection");
       return;
@@ -676,11 +693,13 @@ const Dashboard = () => {
 
     try {
       // Fetch promise data for email
-      const { data: promiseData } = await supabase
+      const { data: rawData } = await supabase
         .from("promises")
         .select("*")
         .eq("id", rejectPromiseId)
         .single();
+
+      const promiseData = rawData as unknown as PromysrPromise;
 
       if (!promiseData) {
         toast.error("Promise not found");
@@ -773,6 +792,7 @@ const Dashboard = () => {
   };
 
   const handleInviteMember = async (email: string, name: string) => {
+    if (!checkGate('invite')) return;
     if (!organization) return;
     const maxSeats = organization.max_users;
     if (orgMembers.length >= maxSeats) {
@@ -868,12 +888,7 @@ const Dashboard = () => {
   // const isExpired = organization?.subscription_plan === 'starter_999' && daysSinceCreation > 7;
 
   // HELPER: Check if plan is Pro or above OR if in active trial
-  const isProOrAbove = organization && (
-    organization.subscription_plan === 'pro_1999' ||
-    organization.subscription_plan === 'ultimate_3999' ||
-    organization.subscription_plan === 'pro' ||
-    organization.status === 'trialing' // All trials have full access
-  );
+  const isProOrAbove = true; // Unlocked
 
   // Derived State & Metrics
   const isTrial = organization?.status === 'trialing';
@@ -1322,44 +1337,107 @@ const Dashboard = () => {
 
       {/* PAYWALL / TRIAL EXPIRED OVERLAY */}
       {showPaywall && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="bg-card w-full max-w-lg p-8 rounded-2xl shadow-2xl border border-primary/20 space-y-6 text-center animate-in zoom-in-95 duration-300">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-              <Lock className="w-10 h-10 text-primary" />
-            </div>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-500">
+          <div className="bg-card w-full max-w-4xl p-0 rounded-2xl shadow-2xl border border-primary/20 flex flex-col md:flex-row overflow-hidden max-h-[90vh]">
 
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold">Start Your 7-Day Free Trial</h2>
-              <p className="text-muted-foreground text-lg">
-                Unlock full unlimited access (Analytics, Unlimited Promises) for 7 days.
-                <br /><span className="text-sm">We'll remind you before your trial ends.</span>
-              </p>
-            </div>
+            {/* LEFT: CONTEXT / TUTORIAL */}
+            <div className="md:w-1/2 p-8 bg-muted/30 border-r border-border/50 flex flex-col justify-center space-y-6">
+              <div className="space-y-2">
+                <Badge variant="outline" className="text-primary border-primary/30 w-fit">
+                  {lockedAction === 'create' && 'Tutorial: Creating Promises'}
+                  {lockedAction === 'verify' && 'Tutorial: Verification Loop'}
+                  {lockedAction === 'reject' && 'Tutorial: Accountability'}
+                  {lockedAction === 'invite' && 'Tutorial: Growing Your Team'}
+                  {!lockedAction && 'Start Your Journey'}
+                </Badge>
+                <h3 className="text-2xl font-bold tracking-tight">
+                  {lockedAction === 'create' && 'Why Commitments Matter'}
+                  {lockedAction === 'verify' && 'Verify to Build Trust'}
+                  {lockedAction === 'reject' && 'Standards Matter'}
+                  {lockedAction === 'invite' && 'Better Together'}
+                  {!lockedAction && 'Unlock Full Potential'}
+                </h3>
+              </div>
 
-            <div className="grid gap-4 pt-4">
-              <Button
-                size="lg"
-                className="w-full text-lg h-14 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 transition-opacity"
-                onClick={handleStartTrial}
-              >
-                Add Card & Start Free Trial
-              </Button>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-3 h-3" /> No charge today. Cancel anytime.
-              </p>
+              <div className="prose prose-sm text-muted-foreground">
+                {lockedAction === 'create' && (
+                  <>
+                    <p>Logging a promise changes it from a vague intention to a <strong>concrete commitment</strong>.</p>
+                    <ul className="list-disc pl-4 space-y-1 mt-2">
+                      <li>Creates a digital paper trail.</li>
+                      <li>Notifies your leader immediately.</li>
+                      <li>Builds your personal integrity score.</li>
+                    </ul>
+                  </>
+                )}
+                {lockedAction === 'verify' && (
+                  <p>
+                    Marking a task as "Done" is only the first step. True accountability requires <strong>verification</strong> from the requestor. This closes the loop and officially updates the reputation score.
+                  </p>
+                )}
+                {lockedAction === 'reject' && (
+                  <p>
+                    Accepting subpar work lowers standards. Rejecting incomplete promises (with feedback) is an act of high integrity—it pushes the team to be better.
+                  </p>
+                )}
+                {lockedAction === 'invite' && (
+                  <p>
+                    Promysr works best as a network. Bringing your team onboard creates a web of accountability where everyone owns their outcomes.
+                  </p>
+                )}
+                {!lockedAction && <p>Take the next step to professional accountability.</p>}
+              </div>
 
-              <div className="pt-2 border-t border-border/50 bg-gray-50/50 rounded-b-lg -m-8 mt-4 p-4">
-                <p className="text-xs text-muted-foreground mb-2">Not ready properly?</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="text-xs"
-                >
-                  Sign Out of Account
-                </Button>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4">
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">1</div>
+                <span>You tried to perform a key action.</span>
+                <div className="w-8 h-[1px] bg-border"></div>
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">2</div>
+                <span>Start trial to unlock.</span>
               </div>
             </div>
+
+            {/* RIGHT: CTA */}
+            <div className="md:w-1/2 p-8 flex flex-col justify-center space-y-6 bg-card">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2 mx-auto md:mx-0">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+
+              <div className="space-y-2 text-center md:text-left">
+                <h2 className="text-3xl font-bold">Start 7-Day Free Trial</h2>
+                <p className="text-muted-foreground">
+                  Unlock unlimited promises, analytics, and invite your full team.
+                </p>
+              </div>
+
+              <div className="grid gap-4 pt-2">
+                <Button
+                  size="lg"
+                  className="w-full text-lg h-14 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg shadow-primary/20"
+                  onClick={handleStartTrial}
+                >
+                  Start Free Trial
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  No charge today. Cancel anytime.
+                </p>
+
+                <div className="pt-4 border-t border-border/50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      setShowPaywall(false);
+                      setLockedAction(null);
+                    }}
+                  >
+                    I'm just browsing for now
+                  </Button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

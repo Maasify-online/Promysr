@@ -367,8 +367,10 @@ serve(async (req) => {
                     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
                     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+                    console.log('Logging email to database:', { promise_id, type, to, subject })
+
                     const { error: insertError } = await supabaseAdmin.from('emails_log').insert({
-                        promise_id: promise_id || null,
+                        promise_id: promise_id || null, // Explicitly handle undefined/null
                         email_type: type,
                         recipient_email: to,
                         subject: subject,
@@ -377,9 +379,14 @@ serve(async (req) => {
                     })
 
                     if (insertError) {
-                        console.error('Error logging email (Insert Failed):', insertError)
+                        console.error('CRITICAL: Failed to insert email log:', insertError)
+                        // Don't throw, just log strongly so we can see it in Supabase logs
                         logErrorDetail = insertError;
+                    } else {
+                        console.log('✅ Email log inserted successfully')
                     }
+                } else {
+                    console.error('MISSING ENV VARS: Cannot log email - SUPABASE_URL or SERVICE_KEY missing')
                 }
             } catch (logError) {
                 console.error('Error logging email (Exception):', logError)
