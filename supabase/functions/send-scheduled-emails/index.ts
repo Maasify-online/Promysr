@@ -87,16 +87,26 @@ serve(async (req) => {
                         utcOffset = 0 // Default to UTC
                 }
 
-                const targetUTCHour = (userHour - utcOffset + 24) % 24
+                // Calculate User's Target UTC Time (Float: Hours + Minutes)
+                const userTimeFloat = userHour + (userMinute / 60)
+                const targetUTC = (userTimeFloat - utcOffset + 24) % 24
+
+                // Calculate Current System UTC Time (Float)
+                const currentUTC = now.getUTCHours() + (now.getUTCMinutes() / 60)
 
                 // Calculate User's Current Day of Week
                 const userDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: userTimezone }).toLowerCase()
 
-                // Check if current time matches user's schedule
-                const isRightHour = currentUTCHour === Math.floor(targetUTCHour)
+                // Check matches with small tolerance (e.g., 5 mins = 0.08 hours)
+                // This handles potential execution delays (e.g., executing at 06:31 instead of 06:30)
+                const timeDiff = Math.abs(targetUTC - currentUTC)
+                // Handle wrap-around (e.g. 23.9 vs 0.1)
+                const wrapDiff = 24 - timeDiff
+                const isRightTime = (timeDiff < 0.1) || (wrapDiff < 0.1)
+
                 const isRightDay = preferredDays.includes(userDayOfWeek)
 
-                if (isRightHour && isRightDay) {
+                if (isRightTime && isRightDay) {
                     console.log(`Sending Daily Brief to ${userEmail} (scheduled for ${userHour}:00 ${userTimezone})`)
 
                     // Call send-morning-brief for this specific user
@@ -141,17 +151,29 @@ serve(async (req) => {
                         utcOffset = 0
                 }
 
-                const targetUTCHour = (reminderHour - utcOffset + 24) % 24
+                const targetUTC = (reminderHour + (reminderMinute / 60) - utcOffset + 24) % 24
+
+                // Current UTC (Float) calculated above as `currentUTC`
+                // But we need to make sure we define it if we didn't enter the daily block.
+                // Safest to jus re-use or re-calc if scoped. 
+                // Let's re-calc to be safe or lift `currentUTC` to top scope?
+                // Actually `currentUTC` was defined in the block above. Let's lift it.
+                // Wait, I can't easily lift it with this tool without editing the middle.
+                // I'll just re-calc it here for safety and simplicity.
+                const currentUTC = now.getUTCHours() + (now.getUTCMinutes() / 60)
 
                 // Calculate User's Current Day of Week
                 const userDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: userTimezone }).toLowerCase()
 
-                // Check if current time matches
-                const isRightHour = currentUTCHour === Math.floor(targetUTCHour)
+                // Check time match
+                const timeDiff = Math.abs(targetUTC - currentUTC)
+                const wrapDiff = 24 - timeDiff
+                const isRightTime = (timeDiff < 0.1) || (wrapDiff < 0.1)
+
                 const isRightDay = userDayOfWeek === reminderDay
 
                 // Check frequency
-                let shouldSend = isRightHour && isRightDay
+                let shouldSend = isRightTime && isRightDay
 
                 if (shouldSend && frequency === 'biweekly' && lastSent) {
                     // For biweekly, check if it's been roughly 14 days (relax to 13 to handle jitter)
