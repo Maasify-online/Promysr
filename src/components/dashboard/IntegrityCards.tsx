@@ -5,9 +5,10 @@ import { CheckCircle2, Circle, Clock, Target } from "lucide-react";
 interface IntegrityCardsProps {
     promises: PromysrPromise[];
     userEmail: string | undefined;
+    integrityScore?: number;
 }
 
-export function IntegrityCards({ promises, userEmail }: IntegrityCardsProps) {
+export function IntegrityCards({ promises, userEmail, integrityScore }: IntegrityCardsProps) {
     if (!userEmail) return null;
 
     // 1. My Commitments (Where I am owner)
@@ -16,11 +17,12 @@ export function IntegrityCards({ promises, userEmail }: IntegrityCardsProps) {
     const myMissed = myPromises.filter(p => p.status === 'Missed').length;
     const myOpen = myPromises.filter(p => p.status === 'Open').length;
 
-    // Integrity Score: Closed / (Closed + Missed)
+    // Integrity Score: Use DB value if exists, else calc or default
     const totalFinished = myClosed + myMissed;
-    const integrityScore = totalFinished > 0
-        ? Math.round((myClosed / totalFinished) * 100)
-        : 100; // Start at 100% until proven otherwise
+
+    const displayScore = integrityScore !== undefined
+        ? integrityScore
+        : (totalFinished > 0 ? Math.round((myClosed / totalFinished) * 100) : 100);
 
     // 2. Pending Reviews (Where I am leader and status is Open)
     // These are promises others made to me that I need to track
@@ -34,7 +36,7 @@ export function IntegrityCards({ promises, userEmail }: IntegrityCardsProps) {
                     <Target className="h-4 w-4 text-primary" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-3xl font-bold promysr-gradient-text">{integrityScore}%</div>
+                    <div className="text-3xl font-bold promysr-gradient-text">{displayScore}%</div>
                     <p className="text-xs text-muted-foreground mt-1">
                         Based on {totalFinished} completed promises
                     </p>

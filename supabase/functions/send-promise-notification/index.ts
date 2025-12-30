@@ -358,6 +358,30 @@ serve(async (req) => {
 
         const data = await res.json()
 
+        // Log the email if sent successfully
+        if (res.ok) {
+            try {
+                const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+                const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+                if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+                    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
+                    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+                    await supabaseAdmin.from('emails_log').insert({
+                        promise_id: promise_id || null,
+                        email_type: type,
+                        recipient_email: to,
+                        subject: subject,
+                        status: 'sent',
+                        sent_at: new Date().toISOString()
+                    })
+                }
+            } catch (logError) {
+                console.error('Error logging email:', logError)
+            }
+        }
+
         return new Response(JSON.stringify(data), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: res.status

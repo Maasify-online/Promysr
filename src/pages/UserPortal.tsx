@@ -9,15 +9,22 @@ import { toast } from "sonner";
 import { format, isToday, isPast, parseISO } from "date-fns";
 import type { PromysrPromise, Profile } from "@/types/promysr";
 
+// Local type extending the shared one to include joined data
+interface PortalPromise extends PromysrPromise {
+    leader?: {
+        full_name: string;
+    };
+}
+
 const UserPortal = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState<Profile | null>(null);
-    const [promises, setPromises] = useState<PromysrPromise[]>([]);
+    const [promises, setPromises] = useState<PortalPromise[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Focus Mode State
-    const [todaysTasks, setTodaysTasks] = useState<PromysrPromise[]>([]);
-    const [pendingTasks, setPendingTasks] = useState<PromysrPromise[]>([]);
+    const [todaysTasks, setTodaysTasks] = useState<PortalPromise[]>([]);
+    const [pendingTasks, setPendingTasks] = useState<PortalPromise[]>([]);
 
     useEffect(() => {
         checkAuthAndLoad();
@@ -69,7 +76,7 @@ const UserPortal = () => {
         const { data: profileData } = await supabase
             .from("profiles")
             .select("*")
-            .eq("id", session.user.id)
+            .eq("user_id", session.user.id)
             .single();
 
         setProfile(profileData);
@@ -84,15 +91,16 @@ const UserPortal = () => {
             .order("due_date", { ascending: true });
 
         if (myPromises) {
-            setPromises(myPromises);
+            const typedPromises = myPromises as unknown as PortalPromise[];
+            setPromises(typedPromises);
 
             // Filter for Focus Mode
-            const today = myPromises.filter(p =>
+            const today = typedPromises.filter(p =>
                 p.status === 'Open' && (isToday(parseISO(p.due_date)) || isPast(parseISO(p.due_date)))
             );
             setTodaysTasks(today);
 
-            const pending = myPromises.filter(p => p.status === 'Pending Verification');
+            const pending = typedPromises.filter(p => p.status === 'Pending Verification');
             setPendingTasks(pending);
         }
 

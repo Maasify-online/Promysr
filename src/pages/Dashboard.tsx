@@ -13,11 +13,12 @@ import { UserManagement } from "@/components/dashboard/UserManagement";
 import { AnalyticsView } from "@/components/dashboard/AnalyticsView";
 import { PromiseInput } from "@/components/dashboard/PromiseInput";
 import { EmailNotificationSettings } from "@/components/dashboard/EmailNotificationSettings";
+import { EmailLogs } from "@/components/dashboard/EmailLogs";
 
 
 
 import { toast } from "sonner";
-import type { PromysrPromise, Organization, OrganizationMember } from "@/types/promysr";
+import type { PromysrPromise, Organization, OrganizationMember, Profile } from "@/types/promysr";
 import { isToday, isPast, parseISO, format, differenceInDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Check, Calendar, Lock, Activity, CheckCircle2, Clock, Zap, Database, Users, Plus, X } from "lucide-react";
@@ -26,14 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useFeedbackTrigger } from "@/hooks/useFeedbackTrigger";
 import { MilestoneFeedbackDialog } from "@/components/feedback/MilestoneFeedbackDialog";
-
-export interface Profile {
-  id: string;
-  user_id: string;
-  email: string;
-  full_name: string | null;
-  subscription_status?: string;
-}
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -1296,6 +1289,11 @@ const Dashboard = () => {
               {/* Email Notification Settings */}
               <div className="mt-6">
                 <EmailNotificationSettings />
+              </div>
+
+              {/* Email Logs */}
+              <div className="mt-6">
+                <EmailLogs />
               </div>
             </>
           )}

@@ -11,6 +11,9 @@ export interface PromysrPromise {
   created_at: string;
   updated_at: string;
   organization_id?: string; // Optional for now
+  rejection_count?: number;
+  last_rejected_at?: string;
+  rejection_reason?: string;
 }
 
 export type PromiseRole = 'leader' | 'owner';
@@ -38,8 +41,13 @@ export interface Organization {
 
 
 export interface Profile {
+  id?: string;
+  user_id?: string;
   email: string;
   full_name: string;
+  role?: 'user' | 'leader' | 'admin';
+  integrity_score?: number;
+  subscription_status?: string;
 }
 
 export interface OrganizationMember {

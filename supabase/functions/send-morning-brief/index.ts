@@ -124,6 +124,17 @@ serve(async (req) => {
                 })
             });
             if (!res.ok) console.error(`Resend Error (Doer): ${res.status} ${await res.text()}`);
+            else {
+                try {
+                    await supabase.from('emails_log').insert({
+                        email_type: 'daily_brief',
+                        recipient_email: email,
+                        subject: subject,
+                        status: 'sent',
+                        sent_at: new Date().toISOString()
+                    });
+                } catch (e) { console.error('Log Error:', e); }
+            }
         }
 
         // B. Send Leader Radars (Now using HTML template)
@@ -163,6 +174,17 @@ serve(async (req) => {
                 })
             });
             if (!res.ok) console.error(`Resend Error (Leader): ${res.status} ${await res.text()}`);
+            else {
+                try {
+                    await supabase.from('emails_log').insert({
+                        email_type: 'leader_daily_radar',
+                        recipient_email: email,
+                        subject: subject,
+                        status: 'sent',
+                        sent_at: new Date().toISOString()
+                    });
+                } catch (e) { console.error('Log Error:', e); }
+            }
         }
 
         return new Response(JSON.stringify({

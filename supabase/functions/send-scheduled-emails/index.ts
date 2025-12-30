@@ -18,9 +18,7 @@ serve(async (req) => {
         // Get current time in UTC
         const now = new Date()
         const currentUTCHour = now.getUTCHours()
-        const currentUTCMinutes = now.getUTCMinutes()
-        const currentDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' }).toLowerCase()
-
+        // We do NOT use global day anymore, as it differs per user timezone
         console.log(`Scheduler running at ${now.toISOString()} (UTC Hour: ${currentUTCHour})`)
 
         // Fetch all users with email notification settings
@@ -71,19 +69,19 @@ serve(async (req) => {
                         utcOffset = 0
                         break
                     case 'Asia/Kolkata':
-                        utcOffset = -5.5 // IST is UTC+5:30
+                        utcOffset = 5.5 // IST is UTC+5:30
                         break
                     case 'America/New_York':
-                        utcOffset = 5 // EST is UTC-5 (ignoring DST for simplicity)
+                        utcOffset = -5 // EST is UTC-5
                         break
                     case 'America/Los_Angeles':
-                        utcOffset = 8 // PST is UTC-8 (ignoring DST for simplicity)
+                        utcOffset = -8 // PST is UTC-8
                         break
                     case 'Europe/London':
-                        utcOffset = 0 // GMT is UTC+0 (ignoring BST for simplicity)
+                        utcOffset = 0 // GMT is UTC+0
                         break
                     case 'Asia/Tokyo':
-                        utcOffset = -9 // JST is UTC+9
+                        utcOffset = 9 // JST is UTC+9
                         break
                     default:
                         utcOffset = 0 // Default to UTC
@@ -91,9 +89,12 @@ serve(async (req) => {
 
                 const targetUTCHour = (userHour - utcOffset + 24) % 24
 
+                // Calculate User's Current Day of Week
+                const userDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: userTimezone }).toLowerCase()
+
                 // Check if current time matches user's schedule
                 const isRightHour = currentUTCHour === Math.floor(targetUTCHour)
-                const isRightDay = preferredDays.includes(currentDayOfWeek)
+                const isRightDay = preferredDays.includes(userDayOfWeek)
 
                 if (isRightHour && isRightDay) {
                     console.log(`Sending Daily Brief to ${userEmail} (scheduled for ${userHour}:00 ${userTimezone})`)
@@ -122,19 +123,19 @@ serve(async (req) => {
                         utcOffset = 0
                         break
                     case 'Asia/Kolkata':
-                        utcOffset = -5.5
+                        utcOffset = 5.5
                         break
                     case 'America/New_York':
-                        utcOffset = 5
+                        utcOffset = -5
                         break
                     case 'America/Los_Angeles':
-                        utcOffset = 8
+                        utcOffset = -8
                         break
                     case 'Europe/London':
                         utcOffset = 0
                         break
                     case 'Asia/Tokyo':
-                        utcOffset = -9
+                        utcOffset = 9
                         break
                     default:
                         utcOffset = 0
@@ -142,17 +143,21 @@ serve(async (req) => {
 
                 const targetUTCHour = (reminderHour - utcOffset + 24) % 24
 
+                // Calculate User's Current Day of Week
+                const userDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: userTimezone }).toLowerCase()
+
                 // Check if current time matches
                 const isRightHour = currentUTCHour === Math.floor(targetUTCHour)
-                const isRightDay = currentDayOfWeek === reminderDay
+                const isRightDay = userDayOfWeek === reminderDay
 
                 // Check frequency
                 let shouldSend = isRightHour && isRightDay
 
                 if (shouldSend && frequency === 'biweekly' && lastSent) {
-                    // For biweekly, check if it's been at least 14 days since last send
+                    // For biweekly, check if it's been roughly 14 days (relax to 13 to handle jitter)
+                    // The isRightDay check prevents sending too early (e.g. at 7 days)
                     const daysSinceLastSend = (now.getTime() - lastSent.getTime()) / (1000 * 60 * 60 * 24)
-                    shouldSend = daysSinceLastSend >= 14
+                    shouldSend = daysSinceLastSend >= 13
                 }
 
                 if (shouldSend) {

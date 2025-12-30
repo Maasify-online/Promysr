@@ -144,6 +144,15 @@ serve(async (req) => {
 
             if (response.ok) {
                 emailsSent.push({ type: 'user', email });
+                try {
+                    await supabase.from('emails_log').insert({
+                        email_type: 'weekly_reminder',
+                        recipient_email: email,
+                        subject: subject,
+                        status: 'sent',
+                        sent_at: new Date().toISOString()
+                    });
+                } catch (e) { console.error('Log Error:', e); }
             }
         }
 
@@ -250,6 +259,15 @@ serve(async (req) => {
 
             if (response.ok) {
                 emailsSent.push({ type: 'leader', email: leaderProfile.email });
+                try {
+                    await supabase.from('emails_log').insert({
+                        email_type: 'leader_weekly_report',
+                        recipient_email: leaderProfile.email,
+                        subject: subject,
+                        status: 'sent',
+                        sent_at: new Date().toISOString()
+                    });
+                } catch (e) { console.error('Log Error:', e); }
             }
         }
 

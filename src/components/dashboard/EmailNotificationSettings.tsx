@@ -587,7 +587,7 @@ export const EmailNotificationSettings = () => {
                                     <Label htmlFor="daily-brief" className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium">Enable Daily Brief</span>
-                                            <Badge variant="outline" className="text-xs">Everyone</Badge>
+                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
                                         </div>
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -696,7 +696,7 @@ export const EmailNotificationSettings = () => {
                                     <Label htmlFor="weekly-reminder" className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium">Enable Weekly Reminder</span>
-                                            <Badge variant="outline" className="text-xs">Everyone</Badge>
+                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
                                         </div>
                                     </Label>
                                     <div className="flex items-center gap-2">
