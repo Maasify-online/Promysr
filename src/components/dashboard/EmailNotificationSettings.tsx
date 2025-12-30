@@ -361,7 +361,7 @@ export const EmailNotificationSettings = () => {
                                     <Label htmlFor="promise-created" className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium">Promise Created</span>
-                                            <Badge variant="secondary" className="text-xs">You</Badge>
+                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
                                         </div>
                                         <div className="text-sm text-muted-foreground">When a new promise is assigned to you</div>
                                     </Label>
@@ -436,7 +436,7 @@ export const EmailNotificationSettings = () => {
                                     <Label htmlFor="promise-verified" className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium">Promise Verified</span>
-                                            <Badge variant="secondary" className="text-xs">You</Badge>
+                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
                                         </div>
                                         <div className="text-sm text-muted-foreground">When your completed promise is verified</div>
                                     </Label>
@@ -461,7 +461,7 @@ export const EmailNotificationSettings = () => {
                                     <Label htmlFor="completion-rejected" className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium">Completion Rejected</span>
-                                            <Badge variant="secondary" className="text-xs">You</Badge>
+                                            <Badge variant="secondary" className="text-xs">Task Owner</Badge>
                                         </div>
                                         <div className="text-sm text-muted-foreground">When your completion is rejected with feedback</div>
                                     </Label>
