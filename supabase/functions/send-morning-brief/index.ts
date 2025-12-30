@@ -128,8 +128,9 @@ serve(async (req) => {
 
         // B. Send Leader Radars (Now using HTML template)
         for (const [email, tasks] of leaderMap.entries()) {
-            if (!checkPref(email, 'daily_brief_enabled')) {
-                console.log(`Skipping Leader Radar for ${email} (Preference Off)`);
+            // Check LEADER preference (separate from user daily brief)
+            if (!checkPref(email, 'leader_daily_radar_enabled')) {
+                console.log(`Skipping Leader Radar for ${email} (Leader Preference Off)`);
                 continue;
             }
 

@@ -62,9 +62,32 @@ serve(async (req) => {
                 // Assuming user timezone is stored in daily_brief_timezone (default: UTC)
                 const userTimezone = settings.daily_brief_timezone || 'UTC'
 
-                // Simple timezone offset calculation (for common timezones)
+                // Timezone offset calculation (UTC offset in hours)
+                // Positive offset means timezone is ahead of UTC, so we subtract
+                // Negative offset means timezone is behind UTC, so we add
                 let utcOffset = 0
-                if (userTimezone === 'Asia/Kolkata') utcOffset = -5.5 // IST is UTC+5:30, so we subtract
+                switch (userTimezone) {
+                    case 'UTC':
+                        utcOffset = 0
+                        break
+                    case 'Asia/Kolkata':
+                        utcOffset = -5.5 // IST is UTC+5:30
+                        break
+                    case 'America/New_York':
+                        utcOffset = 5 // EST is UTC-5 (ignoring DST for simplicity)
+                        break
+                    case 'America/Los_Angeles':
+                        utcOffset = 8 // PST is UTC-8 (ignoring DST for simplicity)
+                        break
+                    case 'Europe/London':
+                        utcOffset = 0 // GMT is UTC+0 (ignoring BST for simplicity)
+                        break
+                    case 'Asia/Tokyo':
+                        utcOffset = -9 // JST is UTC+9
+                        break
+                    default:
+                        utcOffset = 0 // Default to UTC
+                }
 
                 const targetUTCHour = (userHour - utcOffset + 24) % 24
 
@@ -91,10 +114,31 @@ serve(async (req) => {
                 const frequency = settings.weekly_reminder_frequency || 'weekly'
                 const lastSent = settings.weekly_reminder_last_sent ? new Date(settings.weekly_reminder_last_sent) : null
 
-                // Convert to UTC
+                // Convert to UTC using same timezone logic
                 const userTimezone = settings.weekly_reminder_timezone || 'Asia/Kolkata'
                 let utcOffset = 0
-                if (userTimezone === 'Asia/Kolkata') utcOffset = -5.5
+                switch (userTimezone) {
+                    case 'UTC':
+                        utcOffset = 0
+                        break
+                    case 'Asia/Kolkata':
+                        utcOffset = -5.5
+                        break
+                    case 'America/New_York':
+                        utcOffset = 5
+                        break
+                    case 'America/Los_Angeles':
+                        utcOffset = 8
+                        break
+                    case 'Europe/London':
+                        utcOffset = 0
+                        break
+                    case 'Asia/Tokyo':
+                        utcOffset = -9
+                        break
+                    default:
+                        utcOffset = 0
+                }
 
                 const targetUTCHour = (reminderHour - utcOffset + 24) % 24
 
@@ -106,9 +150,9 @@ serve(async (req) => {
                 let shouldSend = isRightHour && isRightDay
 
                 if (shouldSend && frequency === 'biweekly' && lastSent) {
-                    // For biweekly, check if it's been at least 13 days since last send
+                    // For biweekly, check if it's been at least 14 days since last send
                     const daysSinceLastSend = (now.getTime() - lastSent.getTime()) / (1000 * 60 * 60 * 24)
-                    shouldSend = daysSinceLastSend >= 13
+                    shouldSend = daysSinceLastSend >= 14
                 }
 
                 if (shouldSend) {

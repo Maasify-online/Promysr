@@ -20,6 +20,8 @@ interface EmailSettings {
     weekly_reminder_enabled: boolean;
     completion_rejected_enabled: boolean;
     promise_verified_enabled: boolean;
+    leader_daily_radar_enabled: boolean;
+    leader_weekly_report_enabled: boolean;
     daily_brief_time: string;
     daily_brief_timezone: string;
     daily_brief_days: string[];
@@ -623,6 +625,32 @@ export const EmailNotificationSettings = () => {
                                     </Button>
                                 </div>
 
+                                {/* Leader Radar Toggle */}
+                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
+                                    <Label htmlFor="leader-daily-radar" className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium">👑 Enable Leader Daily Radar</span>
+                                            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">Receive team member tasks due today</div>
+                                    </Label>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('leader-daily-radar')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="leader-daily-radar"
+                                            checked={settings.leader_daily_radar_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, leader_daily_radar_enabled: checked })}
+                                        />
+                                    </div>
+                                </div>
+
                                 {settings.daily_brief_enabled && (
                                     <>
                                         <div className="space-y-2">
@@ -722,6 +750,32 @@ export const EmailNotificationSettings = () => {
                                     >
                                         <Eye className="h-4 w-4" />
                                     </Button>
+                                </div>
+
+                                {/* Leader Weekly Report Toggle */}
+                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
+                                    <Label htmlFor="leader-weekly-report" className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium">👑 Enable Leader Weekly Team Report</span>
+                                            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">Leader</Badge>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">Receive team performance stats weekly</div>
+                                    </Label>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPreviewType('leader-weekly-report')}
+                                            className="h-8 w-8"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Switch
+                                            id="leader-weekly-report"
+                                            checked={settings.leader_weekly_report_enabled}
+                                            onCheckedChange={(checked) => setSettings({ ...settings, leader_weekly_report_enabled: checked })}
+                                        />
+                                    </div>
                                 </div>
 
                                 {settings.weekly_reminder_enabled && (

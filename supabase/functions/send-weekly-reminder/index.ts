@@ -158,6 +158,18 @@ serve(async (req) => {
 
             if (!leaderProfile) continue;
 
+            // CHECK LEADER PREFERENCE (separate from user weekly reminder)
+            const { data: leaderSettings } = await supabase
+                .from('email_notification_settings')
+                .select('leader_weekly_report_enabled')
+                .eq('user_id', leaderId)
+                .maybeSingle();
+
+            if (leaderSettings && leaderSettings.leader_weekly_report_enabled === false) {
+                console.log(`Skipping Leader Weekly Report for ${leaderProfile.email} (Leader Preference Off)`);
+                continue;
+            }
+
             // Calculate team stats
             const totalActive = promises.length;
             const pendingVerification = promises.filter(p => p.status === 'Pending Verification').length;

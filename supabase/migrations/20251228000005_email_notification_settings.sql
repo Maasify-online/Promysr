@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS email_notification_settings (
     promise_verified_enabled BOOLEAN DEFAULT true,
     
     -- Daily Brief Schedule
-    daily_brief_time TIME DEFAULT '08:00:00',  -- UTC time
-    daily_brief_timezone TEXT DEFAULT 'UTC',
+    daily_brief_time TIME DEFAULT '08:00:00',  -- Local time (will be converted to UTC)
+    daily_brief_timezone TEXT DEFAULT 'Asia/Kolkata',
     daily_brief_days JSONB DEFAULT '["monday","tuesday","wednesday","thursday","friday"]'::jsonb,
     
     -- Weekly Reminder Schedule
