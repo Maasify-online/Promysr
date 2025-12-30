@@ -155,9 +155,10 @@ export const getEmailTemplate = (type: string, data: any = {}) => {
                     
                     <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e0f2fe;">
                         <h3 style="margin: 0 0 12px 0; color: #0369a1;">This Week's Performance</h3>
-                        <p style="margin: 4px 0; color: #075985;">✓ Completed: <strong>${data.completed_count || 0} promises</strong></p>
-                        <p style="margin: 4px 0; color: #075985;">⏳ In Progress: <strong>${data.in_progress_count || 0} promises</strong></p>
-                        <p style="margin: 4px 0; color: #075985;">⚠️ Missed: <strong>${data.missed_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">📋 Open: <strong>${data.open_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⏳ Pending Verification: <strong>${data.pending_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">⚠️ Overdue: <strong>${data.overdue_count || 0} promises</strong></p>
+                        <p style="margin: 4px 0; color: #075985;">❌ Missed: <strong>${data.missed_count || 0} promises</strong></p>
                         ${data.integrity_score ? `<p style="margin: 12px 0 0 0; font-size: 18px; font-weight: 600; color: #0369a1;">📊 Integrity Score: ${data.integrity_score}%</p>` : ''}
                     </div>
 
