@@ -244,7 +244,7 @@ serve(async (req) => {
 
                     // Call send-weekly-reminder for this specific user
                     await supabase.functions.invoke('send-weekly-reminder', {
-                        body: { userEmail }
+                        body: { userEmail, scope: 'user' }
                     })
 
                     // Update last_sent timestamp
@@ -252,6 +252,45 @@ serve(async (req) => {
                         .from('email_notification_settings')
                         .update({ weekly_reminder_last_sent: now.toISOString() })
                         .eq('user_id', userId)
+
+                    weeklyReminderCount++
+                }
+            }
+
+            // --- LEADER WEEKLY REPORT LOGIC ---
+            if (settings.leader_weekly_report_enabled) {
+                const [reportHour, reportMinute] = (settings.leader_weekly_report_time || '09:00:00').split(':').map(Number)
+                const reportDay = 'monday' // Default to Monday for Team Reports
+                const leaderTimezone = settings.leader_report_timezone || settings.daily_brief_timezone || 'Asia/Kolkata'
+
+                // Re-calculate UTC target
+                let utcOffset = 0
+                switch (leaderTimezone) {
+                    case 'UTC': utcOffset = 0; break;
+                    case 'Asia/Kolkata': utcOffset = 5.5; break;
+                    case 'America/New_York': utcOffset = -5; break;
+                    case 'America/Los_Angeles': utcOffset = -8; break;
+                    case 'Europe/London': utcOffset = 0; break;
+                    case 'Asia/Tokyo': utcOffset = 9; break;
+                    default: utcOffset = 0;
+                }
+
+                const targetUTC = (reportHour + (reportMinute / 60) - utcOffset + 24) % 24
+                const currentUTC = now.getUTCHours() + (now.getUTCMinutes() / 60)
+                const userDayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: leaderTimezone }).toLowerCase()
+
+                const timeDiff = Math.abs(targetUTC - currentUTC)
+                const wrapDiff = 24 - timeDiff
+                const isRightTime = (timeDiff < 0.1) || (wrapDiff < 0.1)
+                const isRightDay = userDayOfWeek === reportDay
+
+                if (isRightTime && isRightDay) {
+                    console.log(`Sending Leader Weekly Report to ${userEmail} (scheduled for ${reportDay} ${reportHour}:00 ${leaderTimezone})`)
+
+                    // Call send-weekly-reminder for this leader (SCOPE: LEADER)
+                    await supabase.functions.invoke('send-weekly-reminder', {
+                        body: { userEmail, scope: 'leader' }
+                    })
 
                     weeklyReminderCount++
                 }
