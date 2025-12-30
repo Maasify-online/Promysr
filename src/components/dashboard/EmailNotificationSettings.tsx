@@ -607,24 +607,6 @@ export const EmailNotificationSettings = () => {
                                     </div>
                                 </div>
 
-                                {/* Leader Radar Preview */}
-                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
-                                    <Label className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">👑 Leader Radar (Team View)</span>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">Leaders receive team member tasks</div>
-                                    </Label>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setPreviewType('leader-daily-radar')}
-                                        className="h-8 w-8"
-                                    >
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
-                                </div>
-
                                 {/* Leader Radar Toggle */}
                                 <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
                                     <Label htmlFor="leader-daily-radar" className="flex-1">
@@ -732,24 +714,6 @@ export const EmailNotificationSettings = () => {
                                             onCheckedChange={(checked) => setSettings({ ...settings, weekly_reminder_enabled: checked })}
                                         />
                                     </div>
-                                </div>
-
-                                {/* Leader Weekly Report Preview */}
-                                <div className="flex items-center justify-between gap-2 pl-4 border-l-2 border-purple-200">
-                                    <Label className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">👑 Leader Weekly Team Report</span>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">Leaders receive team performance stats</div>
-                                    </Label>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setPreviewType('leader-weekly-report')}
-                                        className="h-8 w-8"
-                                    >
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
                                 </div>
 
                                 {/* Leader Weekly Report Toggle */}
