@@ -79,7 +79,10 @@ serve(async (req) => {
 
         if (orgError || !org) {
             console.error("Organization error:", orgError)
-            return new Response(JSON.stringify({ error: 'Organization not found' }), {
+            return new Response(JSON.stringify({
+                error: 'Organization not found',
+                details: `Tried to find org with ID: ${payload.organization_id}`
+            }), {
                 status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
@@ -98,7 +101,10 @@ serve(async (req) => {
 
         if (!membership || membership.role !== 'admin') {
             console.error("Admin check failed. Membership:", membership)
-            return new Response(JSON.stringify({ error: 'Only admins can send invitations' }), {
+            return new Response(JSON.stringify({
+                error: 'Only admins can send invitations',
+                details: `User ${inviterProfile.id} is not an admin of org ${payload.organization_id}. Role found: ${membership?.role || 'none'}`
+            }), {
                 status: 403,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
