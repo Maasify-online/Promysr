@@ -253,19 +253,53 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
     const maxSeats = organization.max_users;
     const isFull = usedSeats >= maxSeats;
 
-    const handleInvite = () => {
+    const handleInvite = async () => {
         if (!inviteEmail) return;
         if (isFull) {
             toast.error("Organization is full. Upgrade to Pro for more seats.");
             return;
         }
 
-        // Simulate sending email
-        toast.success(`Invite sending to ${inviteEmail}...`, {
-            description: "Simulated Email: 'Join Organization on Promysr' (See email_templates.md)",
-            duration: 5000,
-        });
-        setInviteEmail("");
+        try {
+            toast.loading("Sending invitation...");
+
+            const { data, error } = await supabase.functions.invoke('send-team-invitation', {
+                body: {
+                    organization_id: organization.id,
+                    invitee_email: inviteEmail,
+                    invitee_name: inviteEmail.split('@')[0], // Fallback name
+                    role: 'member'
+                }
+            });
+
+            toast.dismiss();
+
+            if (error) {
+                console.error('Invitation error:', error);
+                toast.error("Failed to send invitation", {
+                    description: error.message || "Please try again"
+                });
+                return;
+            }
+
+            if (data?.error) {
+                toast.error("Failed to send invitation", {
+                    description: data.error
+                });
+                return;
+            }
+
+            toast.success(`Invitation sent to ${inviteEmail}`, {
+                description: "The invitee will receive an email to join your organization."
+            });
+            setInviteEmail("");
+        } catch (err: any) {
+            console.error('Invitation exception:', err);
+            toast.dismiss();
+            toast.error("Failed to send invitation", {
+                description: err.message || "An unexpected error occurred"
+            });
+        }
     };
 
     // DEV TOOL: Toggle Plan
