@@ -64,6 +64,7 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
     }, [organization?.id]);
 
     const fetchPendingInvites = async () => {
+        // @ts-ignore - Table types not yet updated locally
         const { data } = await supabase
             .from('organization_invitations')
             .select('*')
@@ -814,10 +815,12 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
                     </div>
 
                     {/* Pending Invites List */}
-                    {pendingInvites.length > 0 && (
-                        <div className="mt-6 space-y-3">
-                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Pending Invitations</h4>
-                            {pendingInvites.map((invite) => (
+                    <div className="mt-6 space-y-3">
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Pending Invitations</h4>
+                        {pendingInvites.length === 0 ? (
+                            <p className="text-sm text-muted-foreground italic">No pending invitations.</p>
+                        ) : (
+                            pendingInvites.map((invite) => (
                                 <div key={invite.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-xs font-bold">
@@ -833,9 +836,9 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
                                         Copy Link
                                     </Button>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            ))
+                        )}
+                    </div>
                 </CardContent>
             </Card>
 
