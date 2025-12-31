@@ -37,9 +37,18 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
     // State for Member Mode (Who acts as Leader?)
     const [accountabilityTarget, setAccountabilityTarget] = useState<'self' | 'leader'>('self');
 
-    // Smart Default: Today
-    const defaultDate = new Date().toISOString().split('T')[0];
-    const [dueDate, setDueDate] = useState(defaultDate);
+    // Smart Default: Today (or Tomorrow if too late)
+    const [dueDate, setDueDate] = useState(() => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
+        // If after 11:30 PM (23:30), default to Tomorrow
+        if (currentHour === 23 && currentMinute >= 30) {
+            return addDays(new Date(), 1).toISOString().split('T')[0];
+        }
+        return new Date().toISOString().split('T')[0];
+    });
 
     // Find Leader ID if needed (First admin found)
     const leaderMember = members.find(m => m.role === 'admin');
@@ -114,7 +123,10 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
             await onSubmit(payload);
             // Reset
             setText("");
-            setDueDate(defaultDate);
+            // Recalculate smart default
+            const now = new Date();
+            const isLate = now.getHours() === 23 && now.getMinutes() >= 30;
+            setDueDate(isLate ? addDays(now, 1).toISOString().split('T')[0] : now.toISOString().split('T')[0]);
             setSelectedOwnerId("me");
             setAccountabilityTarget("self");
         } catch (error) {
@@ -196,13 +208,17 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
                                     >
                                         Myself
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setAccountabilityTarget('leader')}
-                                        className={`px-2 sm:px-3 text-[10px] sm:text-xs font-medium rounded-full h-full transition-colors flex items-center gap-1 flex-1 sm:flex-none justify-center ${accountabilityTarget === 'leader' ? 'bg-primary/10 text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                                    >
-                                        Leader
-                                    </button>
+
+                                    {/* Only show Leader option if a leader exists */}
+                                    {leaderMember && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setAccountabilityTarget('leader')}
+                                            className={`px-2 sm:px-3 text-[10px] sm:text-xs font-medium rounded-full h-full transition-colors flex items-center gap-1 flex-1 sm:flex-none justify-center ${accountabilityTarget === 'leader' ? 'bg-primary/10 text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                        >
+                                            Leader
+                                        </button>
+                                    )}
                                 </div>
                             )}
 

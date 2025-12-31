@@ -21,6 +21,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye } from "lucide-react";
 import { getEmailTemplate } from "@/utils/emailTemplates";
+import { useEffect } from "react";
+import { Copy } from "lucide-react";
+
+interface PendingInvitation {
+    id: string;
+    invitee_email: string;
+    token: string;
+    created_at: string;
+}
 
 interface OrganizationSettingsProps {
     organization: Organization;
@@ -46,6 +55,31 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
 
     const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
     const [isLoadingStripe, setIsLoadingStripe] = useState(false);
+    const [pendingInvites, setPendingInvites] = useState<PendingInvitation[]>([]);
+
+    useEffect(() => {
+        if (organization?.id) {
+            fetchPendingInvites();
+        }
+    }, [organization?.id]);
+
+    const fetchPendingInvites = async () => {
+        const { data } = await supabase
+            .from('organization_invitations')
+            .select('*')
+            .eq('organization_id', organization.id)
+            .eq('status', 'pending');
+
+        if (data) {
+            setPendingInvites(data);
+        }
+    };
+
+    const copyInviteLink = (token: string) => {
+        const link = `${window.location.origin}/accept-invite?token=${token}`;
+        navigator.clipboard.writeText(link);
+        toast.success("Invite link copied to clipboard!");
+    };
 
     // Load Razorpay Script
     const loadRazorpay = () => {
@@ -778,10 +812,34 @@ export function OrganizationSettings({ organization, members, isOwner }: Organiz
                             Invite
                         </Button>
                     </div>
+
+                    {/* Pending Invites List */}
+                    {pendingInvites.length > 0 && (
+                        <div className="mt-6 space-y-3">
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Pending Invitations</h4>
+                            {pendingInvites.map((invite) => (
+                                <div key={invite.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-xs font-bold">
+                                            ⌛
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-sm">{invite.invitee_email}</p>
+                                            <p className="text-xs text-muted-foreground">Expires in 7 days</p>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => copyInviteLink(invite.token)}>
+                                        <Copy className="w-4 h-4 mr-2" />
+                                        Copy Link
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
-            {/* 4. MEMBERS (Basic View) */}
+            {/* 5. MEMBERS (Basic View) */}
             <Card>
                 <CardHeader>
                     <CardTitle>Team Members</CardTitle>
