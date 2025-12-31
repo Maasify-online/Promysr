@@ -854,16 +854,18 @@ const Dashboard = () => {
       toast.dismiss();
 
       if (error) {
-        console.error('Invitation error:', error);
-        toast.error("Failed to send invitation", {
-          description: error.message || "Please try again"
-        });
-        return;
-      }
+        console.error('Invitation error details:', error);
+        let errorMsg = "Please try again";
 
-      if (data?.error) {
+        // Try to extract the error message from the response body if it's a JSON error
+        if (data && data.error) {
+          errorMsg = data.error;
+        } else if (error.message) {
+          errorMsg = error.message;
+        }
+
         toast.error("Failed to send invitation", {
-          description: data.error
+          description: errorMsg
         });
         return;
       }

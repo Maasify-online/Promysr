@@ -28,11 +28,14 @@ serve(async (req) => {
 
     try {
         const payload: InvitationPayload = await req.json()
+        console.log("Invitation request payload:", JSON.stringify(payload))
+
         const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
         // 1. Get authenticated user
         const authHeader = req.headers.get('Authorization')
         if (!authHeader) {
+            console.error("Missing authorization header")
             return new Response(JSON.stringify({ error: 'No authorization header' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -43,11 +46,13 @@ serve(async (req) => {
         const { data: { user }, error: userError } = await supabase.auth.getUser(token)
 
         if (userError || !user) {
+            console.error("Auth error or user not found:", userError)
             return new Response(JSON.stringify({ error: 'Unauthorized' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
+        console.log("Authenticated user:", user.email, user.id)
 
         // 2. Get inviter's profile
         const { data: inviterProfile, error: profileError } = await supabase
@@ -57,11 +62,13 @@ serve(async (req) => {
             .single()
 
         if (profileError || !inviterProfile) {
+            console.error("Inviter profile error:", profileError)
             return new Response(JSON.stringify({ error: 'Inviter profile not found' }), {
                 status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
+        console.log("Inviter profile:", JSON.stringify(inviterProfile))
 
         // 3. Get organization details
         const { data: org, error: orgError } = await supabase
@@ -71,11 +78,13 @@ serve(async (req) => {
             .single()
 
         if (orgError || !org) {
+            console.error("Organization error:", orgError)
             return new Response(JSON.stringify({ error: 'Organization not found' }), {
                 status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
+        console.log("Organization found:", org.name)
 
         // 4. Check if inviter is admin
         const { data: membership } = await supabase
@@ -85,7 +94,10 @@ serve(async (req) => {
             .eq('user_id', inviterProfile.id)
             .single()
 
+        console.log("Membership found:", JSON.stringify(membership))
+
         if (!membership || membership.role !== 'admin') {
+            console.error("Admin check failed. Membership:", membership)
             return new Response(JSON.stringify({ error: 'Only admins can send invitations' }), {
                 status: 403,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -98,7 +110,10 @@ serve(async (req) => {
             .select('*', { count: 'exact', head: true })
             .eq('organization_id', payload.organization_id)
 
-        if (memberCount && memberCount >= org.max_users) {
+        console.log("Current member count:", memberCount, "Max seats:", org.max_users)
+
+        if (memberCount !== null && memberCount >= org.max_users) {
+            console.error("Seat limit reached")
             return new Response(JSON.stringify({
                 error: 'Organization has reached maximum member limit',
                 max_users: org.max_users,
@@ -113,7 +128,7 @@ serve(async (req) => {
         const { data: existingProfile } = await supabase
             .from('profiles')
             .select('id')
-            .eq('email', payload.invitee_email)
+            .eq('email', payload.invitee_email.toLowerCase())
             .single()
 
         if (existingProfile) {
@@ -125,6 +140,7 @@ serve(async (req) => {
                 .single()
 
             if (existingMember) {
+                console.error("Inviteee is already a member")
                 return new Response(JSON.stringify({ error: 'User is already a member of this organization' }), {
                     status: 400,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -137,11 +153,12 @@ serve(async (req) => {
             .from('organization_invitations')
             .select('id, status')
             .eq('organization_id', payload.organization_id)
-            .eq('invitee_email', payload.invitee_email)
+            .eq('invitee_email', payload.invitee_email.toLowerCase())
             .eq('status', 'pending')
             .single()
 
         if (existingInvite) {
+            console.error("Pending invitation already exists")
             return new Response(JSON.stringify({
                 error: 'An invitation has already been sent to this email',
                 invitation_id: existingInvite.id
@@ -157,6 +174,7 @@ serve(async (req) => {
         const inviteToken = Array.from(token_bytes, byte => byte.toString(16).padStart(2, '0')).join('')
 
         // 9. Create invitation record
+        console.log("Creating invitation record...")
         const { data: invitation, error: inviteError } = await supabase
             .from('organization_invitations')
             .insert({
@@ -171,15 +189,18 @@ serve(async (req) => {
             .single()
 
         if (inviteError) {
-            console.error('Error creating invitation:', inviteError)
-            return new Response(JSON.stringify({ error: 'Failed to create invitation' }), {
+            console.error('Error creating invitation in DB:', inviteError)
+            return new Response(JSON.stringify({ error: 'Failed to create invitation in database' }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
 
+        console.log("Invitation record created successfully:", invitation.id)
+
         // 10. Send invitation email
         const inviteLink = `${APP_URL}/accept-invite?token=${inviteToken}`
+        console.log("Invite link generated:", inviteLink)
 
         const emailHtml = `
             <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -235,6 +256,7 @@ serve(async (req) => {
             })
         }
 
+        console.log("Sending email via Resend...")
         const emailRes = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -253,6 +275,8 @@ serve(async (req) => {
 
         if (!emailRes.ok) {
             console.error('Email send failed:', emailData)
+        } else {
+            console.log("Email sent successfully!")
         }
 
         return new Response(JSON.stringify({
