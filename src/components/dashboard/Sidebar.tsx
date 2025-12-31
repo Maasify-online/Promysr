@@ -2,6 +2,7 @@ import { LayoutDashboard, Users, BarChart2, Settings, HelpCircle, LogOut, FileCh
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
     activeTab: string;
@@ -18,6 +19,8 @@ import { useState } from "react";
 
 // EXTRACTED CONTENT COMPONENT
 function SidebarContent({ activeTab, onTabChange, onSignOut, className, subscriptionPlan = 'starter_999', userRole = 'member', onItemClick }: SidebarProps & { onItemClick?: () => void }) {
+    const navigate = useNavigate();
+
     // PLAN HELPERS
     const isBasic = false; // Unlocked for user request
 
@@ -77,7 +80,7 @@ function SidebarContent({ activeTab, onTabChange, onSignOut, className, subscrip
                             <Button
                                 variant="ghost"
                                 className="w-full justify-start relative text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10"
-                                onClick={() => { window.location.href = '/user-portal'; if (onItemClick) onItemClick(); }}
+                                onClick={() => { navigate('/user-portal'); if (onItemClick) onItemClick(); }}
                             >
                                 <Zap className="mr-2 h-4 w-4" />
                                 Focus Mode

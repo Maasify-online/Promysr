@@ -56,10 +56,26 @@ async function checkSettings() {
         }
 
         console.log(`   ✅ Leader Radar:      ${s.leader_daily_radar_enabled ? "ON" : "OFF"}`);
-        console.log(`   ✅ Promise Events: `);
-        console.log(`      - Created: ${s.promise_created_enabled ? "ON" : "OFF"}`);
-        console.log(`      - Closed:  ${s.promise_closed_enabled ? "ON" : "OFF"}`);
-        console.log(`      - Missed:  ${s.promise_missed_enabled ? "ON" : "OFF"}`);
+        if (s.leader_daily_radar_enabled) {
+            console.log(`      🕒 Time: ${s.leader_daily_radar_time} (${s.leader_report_timezone || 'Default'})`);
+            console.log(`      📅 Days: [${s.leader_daily_radar_days ? s.leader_daily_radar_days.join(', ') : 'Default'}]`);
+        }
+
+        console.log(`   ✅ Leader Weekly Report: ${s.leader_weekly_report_enabled ? "ON" : "OFF"}`);
+        if (s.leader_weekly_report_enabled) {
+            console.log(`      🕒 Time: ${s.leader_weekly_report_time} on ${s.leader_weekly_report_day} (${s.leader_report_timezone || 'Default'})`);
+            console.log(`      🔄 Freq: ${s.leader_weekly_report_frequency}`);
+        }
+
+        console.log(`   ✅ Leader Events: `);
+        console.log(`      - Promise Created: ${s.promise_created_enabled ? "ON" : "OFF"}`);
+        console.log(`      - Promise Closed:  ${s.promise_closed_enabled ? "ON" : "OFF"}`);
+        console.log(`      - Promise Missed:  ${s.promise_missed_enabled ? "ON" : "OFF"}`);
+        console.log(`      - Review Needed:   ${s.review_needed_enabled ? "ON" : "OFF"}`);
+
+        console.log(`   ✅ Task Owner Events: `);
+        console.log(`      - Promise Verified:      ${s.promise_verified_enabled ? "ON" : "OFF"}`);
+        console.log(`      - Completion Rejected:   ${s.completion_rejected_enabled ? "ON" : "OFF"}`);
     });
 }
 

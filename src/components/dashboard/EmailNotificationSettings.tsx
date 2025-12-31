@@ -356,6 +356,7 @@ export const EmailNotificationSettings = () => {
                     weekly_reminder_frequency: 'weekly',
                     leader_daily_radar_time: '08:00:00',
                     leader_weekly_report_time: '09:00:00',
+                    leader_weekly_report_frequency: 'weekly',
                     leader_report_timezone: 'Asia/Kolkata'
                 };
 
@@ -602,6 +603,22 @@ export const EmailNotificationSettings = () => {
                                                         {TIME_SLOTS.map(time => (
                                                             <SelectItem key={time} value={time}>{time}</SelectItem>
                                                         ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Frequency</Label>
+                                                <Select
+                                                    value={settings.leader_weekly_report_frequency || 'weekly'}
+                                                    onValueChange={(value) => setSettings({ ...settings, leader_weekly_report_frequency: value })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                                        <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                                                        <SelectItem value="monthly">Monthly</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>

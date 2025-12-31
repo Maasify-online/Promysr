@@ -116,7 +116,7 @@ const UserPortal = () => {
             );
             setUpcomingTasks(upcoming);
 
-            // Completed: Closed promises
+            // Completed: Closed promises (last 30 days for performance)
             const completed = typedPromises.filter(p => p.status === 'Closed');
             setCompletedTasks(completed);
         }
@@ -142,6 +142,7 @@ const UserPortal = () => {
             toast.success("Marked as Complete - Leader Notified");
 
             // Notify Leader (Trigger Review)
+            // Fetch full promise to get leader details
             const { data: fullPromise } = await supabase.from('promises').select('*, leader:leader_id(email, full_name)').eq('id', id).single();
 
             if (fullPromise && fullPromise.leader) {
@@ -173,14 +174,14 @@ const UserPortal = () => {
     return (
         <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
             {/* Minimal Header */}
-            <header className="px-6 py-6 flex justify-between items-center max-w-3xl mx-auto">
+            <header className="px-6 py-6 flex justify-between items-center max-w-2xl mx-auto">
                 <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
                         <span className="font-bold text-white text-lg">P</span>
                     </div>
                     <div>
-                        <h1 className="font-bold text-lg leading-tight">Focus Mode</h1>
-                        <p className="text-xs text-slate-400 font-medium">My Commitments</p>
+                        <h1 className="font-bold text-lg leading-tight">User Portal</h1>
+                        <p className="text-xs text-slate-400 font-medium">Focus Mode</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -194,7 +195,7 @@ const UserPortal = () => {
                 </div>
             </header>
 
-            <main className="max-w-3xl mx-auto px-6 pb-20">
+            <main className="max-w-2xl mx-auto px-6 pb-20 space-y-8">
 
                 {/* Integrity Score Hero */}
                 <div className="text-center py-8">
@@ -214,54 +215,24 @@ const UserPortal = () => {
                     </p>
                 </div>
 
-                {/* Tabbed Interface */}
-                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full mt-8">
-                    <TabsList className="grid w-full grid-cols-4 bg-slate-900/50 p-1 rounded-lg">
-                        <TabsTrigger value="action" className="relative data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                            <AlertCircle className="w-4 h-4 mr-2" />
-                            Action
-                            {actionRequired.length > 0 && (
-                                <Badge className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0 h-5 min-w-[20px]">
-                                    {actionRequired.length}
-                                </Badge>
-                            )}
-                        </TabsTrigger>
-                        <TabsTrigger value="pending" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                            <Clock className="w-4 h-4 mr-2" />
-                            Pending
-                            {pendingTasks.length > 0 && (
-                                <Badge className="ml-2 bg-yellow-500 text-slate-900 text-xs px-1.5 py-0 h-5 min-w-[20px]">
-                                    {pendingTasks.length}
-                                </Badge>
-                            )}
-                        </TabsTrigger>
-                        <TabsTrigger value="upcoming" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                            Upcoming
-                            {upcomingTasks.length > 0 && (
-                                <Badge className="ml-2 bg-blue-500 text-white text-xs px-1.5 py-0 h-5 min-w-[20px]">
-                                    {upcomingTasks.length}
-                                </Badge>
-                            )}
-                        </TabsTrigger>
-                        <TabsTrigger value="completed" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                            <CheckCircle2 className="w-4 h-4 mr-2" />
-                            Done
-                            {completedTasks.length > 0 && (
-                                <Badge className="ml-2 bg-green-500 text-white text-xs px-1.5 py-0 h-5 min-w-[20px]">
-                                    {completedTasks.length}
-                                </Badge>
-                            )}
-                        </TabsTrigger>
-                    </TabsList>
+                {/* Today's Focus */}
+                <section>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-blue-500" />
+                            Due Today
+                        </h3>
+                        <Badge className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-0">
+                            {actionRequired.length} Pending
+                        </Badge>
+                    </div>
 
-                    {/* Action Required Tab */}
-                    <TabsContent value="action" className="mt-6 space-y-3">
+                    <div className="space-y-3">
                         {actionRequired.length === 0 ? (
                             <Card className="bg-slate-900/50 border-slate-800 border-dashed">
-                                <CardContent className="py-16 text-center">
-                                    <CheckCircle2 className="w-16 h-16 text-emerald-500/20 mx-auto mb-4" />
-                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">All Caught Up!</h3>
-                                    <p className="text-slate-400 text-sm">Nothing needs your attention right now.</p>
+                                <CardContent className="py-12 text-center">
+                                    <CheckCircle2 className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                                    <p className="text-slate-400">All caught up for today!</p>
                                 </CardContent>
                             </Card>
                         ) : (
@@ -269,13 +240,13 @@ const UserPortal = () => {
                                 <Card key={promise.id} className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors group">
                                     <CardContent className="p-5 flex items-start gap-4">
                                         <div
-                                            className="mt-1 h-6 w-6 rounded-full border-2 border-slate-600 hover:border-emerald-500 hover:bg-emerald-500/20 cursor-pointer transition-all flex items-center justify-center flex-shrink-0"
+                                            className="mt-1 h-6 w-6 rounded-full border-2 border-slate-600 hover:border-emerald-500 hover:bg-emerald-500/20 cursor-pointer transition-all flex items-center justify-center"
                                             onClick={() => handleMarkComplete(promise.id)}
                                             title="Mark as Complete"
                                         >
                                             <CheckCircle2 className="w-4 h-4 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1">
                                             <p className="font-medium text-lg text-slate-200 leading-snug">{promise.promise_text}</p>
 
                                             {/* Rejection Feedback */}
@@ -294,17 +265,12 @@ const UserPortal = () => {
                                                 </span>
                                                 {isPast(parseISO(promise.due_date)) && !isToday(parseISO(promise.due_date)) && (
                                                     <span className="text-red-400 font-medium flex items-center gap-1">
-                                                        🔴 Overdue
-                                                    </span>
-                                                )}
-                                                {isToday(parseISO(promise.due_date)) && (
-                                                    <span className="text-orange-400 font-medium">
-                                                        ⏰ Due Today
+                                                        Overdue
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="text-right flex-shrink-0">
+                                        <div className="text-right">
                                             <p className="text-sm font-bold text-white">
                                                 {format(parseISO(promise.due_date), "h:mm a")}
                                             </p>
@@ -313,50 +279,35 @@ const UserPortal = () => {
                                 </Card>
                             ))
                         )}
-                    </TabsContent>
+                    </div>
+                </section>
 
-                    {/* Pending Review Tab */}
-                    <TabsContent value="pending" className="mt-6 space-y-3">
-                        {pendingTasks.length === 0 ? (
-                            <Card className="bg-slate-900/50 border-slate-800 border-dashed">
-                                <CardContent className="py-16 text-center">
-                                    <Clock className="w-16 h-16 text-yellow-500/20 mx-auto mb-4" />
-                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">No Pending Reviews</h3>
-                                    <p className="text-slate-400 text-sm">Promises you mark complete will appear here.</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            pendingTasks.map(promise => (
-                                <Card key={promise.id} className="bg-slate-900/30 border-slate-800/50">
-                                    <CardContent className="p-4 flex items-center gap-3">
-                                        <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse flex-shrink-0"></div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-slate-400 line-through decoration-slate-600">{promise.promise_text}</p>
-                                            <p className="text-xs text-slate-500 mt-1">Waiting for {promise.leader?.full_name || 'leader'} to verify</p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))
-                        )}
-                    </TabsContent>
+                {/* Pending Verification */}
+                {pendingTasks.length > 0 && (
+                    <section>
+                        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4 pl-1">Waiting for Review</h3>
+                        <div className="space-y-2 opacity-60 hover:opacity-100 transition-opacity">
+                            {pendingTasks.map(promise => (
+                                <div key={promise.id} className="flex items-center gap-3 p-4 bg-slate-900/30 rounded-lg border border-slate-800/50">
+                                    <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                                    <span className="text-slate-400 line-through decoration-slate-600">{promise.promise_text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
-                    {/* Upcoming Tab */}
-                    <TabsContent value="upcoming" className="mt-6 space-y-3">
-                        {upcomingTasks.length === 0 ? (
-                            <Card className="bg-slate-900/50 border-slate-800 border-dashed">
-                                <CardContent className="py-16 text-center">
-                                    <div className="text-6xl mb-4">📅</div>
-                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">No Upcoming Commitments</h3>
-                                    <p className="text-slate-400 text-sm">Future promises will appear here.</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            upcomingTasks.map(promise => (
+                {/* Upcoming Promises */}
+                {upcomingTasks.length > 0 && (
+                    <section>
+                        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4 pl-1">Upcoming Commitments</h3>
+                        <div className="space-y-2">
+                            {upcomingTasks.map(promise => (
                                 <Card key={promise.id} className="bg-slate-900/50 border-slate-800/50 hover:border-slate-700/50 transition-colors">
                                     <CardContent className="p-4 flex items-center gap-4">
-                                        <div className="h-2 w-2 rounded-full bg-blue-500/50 flex-shrink-0"></div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-slate-300 text-sm font-medium">{promise.promise_text}</p>
+                                        <div className="h-2 w-2 rounded-full bg-blue-500/50"></div>
+                                        <div className="flex-1">
+                                            <p className="text-slate-300 text-sm">{promise.promise_text}</p>
                                             <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
                                                 <span>To: {promise.leader?.full_name || 'Leader'}</span>
                                                 <span>•</span>
@@ -365,35 +316,11 @@ const UserPortal = () => {
                                         </div>
                                     </CardContent>
                                 </Card>
-                            ))
-                        )}
-                    </TabsContent>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
-                    {/* Completed Tab */}
-                    <TabsContent value="completed" className="mt-6 space-y-3">
-                        {completedTasks.length === 0 ? (
-                            <Card className="bg-slate-900/50 border-slate-800 border-dashed">
-                                <CardContent className="py-16 text-center">
-                                    <div className="text-6xl mb-4">🎯</div>
-                                    <h3 className="text-lg font-semibold text-slate-300 mb-2">No Completed Promises Yet</h3>
-                                    <p className="text-slate-400 text-sm">Complete your first promise to see it here!</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            completedTasks.map(promise => (
-                                <Card key={promise.id} className="bg-slate-900/30 border-green-900/20">
-                                    <CardContent className="p-4 flex items-center gap-3">
-                                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-slate-300 text-sm font-medium line-through decoration-green-500/30">{promise.promise_text}</p>
-                                            <p className="text-xs text-slate-500 mt-1">Verified by {promise.leader?.full_name || 'leader'}</p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))
-                        )}
-                    </TabsContent>
-                </Tabs>
 
             </main>
         </div>

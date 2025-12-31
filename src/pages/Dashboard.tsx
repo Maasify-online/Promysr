@@ -839,10 +839,45 @@ const Dashboard = () => {
       return;
     }
 
-    // Simulate sending email (Reuse template logic via toast)
-    toast.success(`Invitation Sent to ${name} (${email})`, {
-      description: "They will receive an email to join your organization."
-    });
+    try {
+      toast.loading("Sending invitation...");
+
+      const { data, error } = await supabase.functions.invoke('send-team-invitation', {
+        body: {
+          organization_id: organization.id,
+          invitee_email: email,
+          invitee_name: name,
+          role: 'member'
+        }
+      });
+
+      toast.dismiss();
+
+      if (error) {
+        console.error('Invitation error:', error);
+        toast.error("Failed to send invitation", {
+          description: error.message || "Please try again"
+        });
+        return;
+      }
+
+      if (data?.error) {
+        toast.error("Failed to send invitation", {
+          description: data.error
+        });
+        return;
+      }
+
+      toast.success(`Invitation sent to ${name}`, {
+        description: `${email} will receive an email to join your organization.`
+      });
+    } catch (err: any) {
+      console.error('Invitation exception:', err);
+      toast.dismiss();
+      toast.error("Failed to send invitation", {
+        description: err.message || "An unexpected error occurred"
+      });
+    }
   };
 
   const handleBulkInvite = async (users: { email: string, name: string }[]) => {
