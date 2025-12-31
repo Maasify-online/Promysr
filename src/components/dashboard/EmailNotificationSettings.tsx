@@ -394,6 +394,16 @@ export const EmailNotificationSettings = () => {
             if (error) throw error;
 
             toast.success('Email notification settings saved');
+
+            // IMMEDIATE ACTION: Check scheduler for this user right now
+            // This handles the user request: "whenever it is changed it actions on it internally"
+            supabase.functions.invoke('send-scheduled-emails', {
+                body: { user_id: user.id }
+            }).then(({ error: invokeError }) => {
+                if (invokeError) console.error('Immediate scheduler check failed:', invokeError);
+                else console.log('Immediate scheduler check triggered');
+            });
+
         } catch (err) {
             console.error('Error saving settings:', err);
             toast.error('Failed to save settings');

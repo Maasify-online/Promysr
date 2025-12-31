@@ -18,16 +18,10 @@ serve(async (req) => {
         // Check for Debug Time Override
         const method = req.method
         let debugNowTime = null
-        if (method === 'POST') {
-            try {
-                const body = await req.json()
-                if (body.debugNow) {
-                    debugNowTime = new Date(body.debugNow)
-                    console.log(`⚠️ DEBUG MODE: Using Time Override: ${debugNowTime.toISOString()}`)
-                }
-            } catch (e) {
-                // Squelch JSON parse errors on empty body
-            }
+
+        if (body.debugNow) {
+            debugNowTime = new Date(body.debugNow)
+            console.log(`⚠️ DEBUG MODE: Using Time Override: ${debugNowTime.toISOString()}`)
         }
 
         // Get current time in UTC (or override)
@@ -37,9 +31,22 @@ serve(async (req) => {
         console.log(`Scheduler running at ${now.toISOString()} (UTC Hour: ${currentUTCHour})`)
 
         // Fetch all users with email notification settings
-        const { data: allSettings, error: settingsError } = await supabase
+        // If a specific userId is provided (e.g., immediate check on save), filter by it.
+        let body: any = {};
+        try { body = await req.json(); } catch (e) { } // Safe parse
+
+        const targetUserId = body.user_id;
+
+        let query = supabase
             .from('email_notification_settings')
             .select('*')
+
+        if (targetUserId) {
+            console.log(`🎯 Targeted run for user: ${targetUserId}`)
+            query = query.eq('user_id', targetUserId)
+        }
+
+        const { data: allSettings, error: settingsError } = await query;
 
         if (settingsError) throw settingsError
 
