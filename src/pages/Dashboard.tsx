@@ -870,9 +870,15 @@ const Dashboard = () => {
         return;
       }
 
-      toast.success(`Invitation sent to ${name}`, {
-        description: `${email} will receive an email to join your organization.`
-      });
+      if (data && data.email_sent === false) {
+        toast.warning(`Member invited, but email failed`, {
+          description: "The invitation was created, but the email could not be sent. Please check your Resend settings or spam folder."
+        });
+      } else {
+        toast.success(`Invitation sent to ${name}`, {
+          description: `${email} will receive an email to join your organization.`
+        });
+      }
     } catch (err: any) {
       console.error('Invitation exception:', err);
       toast.dismiss();

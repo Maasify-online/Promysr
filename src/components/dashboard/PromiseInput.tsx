@@ -228,9 +228,26 @@ export function PromiseInput({ onSubmit, userEmail, userRole = 'member', members
                                             onSelect={(date) => date && setDueDate(format(date, 'yyyy-MM-dd'))}
                                             // Allow selection of Today by comparing against start of today (00:00)
                                             disabled={(date) => {
+                                                const now = new Date();
                                                 const today = new Date();
                                                 today.setHours(0, 0, 0, 0);
-                                                return date < today;
+
+                                                // 1. Disable past days
+                                                if (date < today) return true;
+
+                                                // 2. Disable TODAY if it's too late (after 23:30)
+                                                // "make only the commitments in future and from a certain time maybe 15 - 30 minutes after"
+                                                // This ensures the midnight cron has time to process "Today's" promises before they become missed.
+                                                if (date.getTime() === today.getTime()) {
+                                                    const currentHour = now.getHours();
+                                                    const currentMinute = now.getMinutes();
+                                                    // If after 11:30 PM (23:30)
+                                                    if (currentHour === 23 && currentMinute >= 30) {
+                                                        return true;
+                                                    }
+                                                }
+
+                                                return false;
                                             }}
                                             initialFocus
                                         />
